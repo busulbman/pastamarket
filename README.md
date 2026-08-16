@@ -129,6 +129,82 @@ izin verilen türler JPEG, PNG, WEBP ve GIF'tir.
 Bu yöntem yalnızca tek makinede çalışan demo/geliştirme içindir. Vercel gibi
 efemer dosya sistemine sahip ortamlarda yüklenen görseller kalıcı olmaz.
 
+
+## Netlify'a demo yayını
+
+Next.js runtime'ı (OpenNext tabanlı, **v5**) Netlify tarafından otomatik algılanır.
+`netlify.toml` içine bilerek `[[plugins]]` bloğu **eklenmemiştir** ve hiçbir sürüm
+sabitlenmemiştir. `publish` klasörü de tanımlı değildir — çıktının yerini runtime
+belirler. Static export kullanılmaz: App Router, API route'ları, sepet, checkout ve
+panel sunucu tarafında çalışmaya devam eder.
+
+### Build ayarları
+
+| Ayar | Değer | Nerede tanımlı |
+| --- | --- | --- |
+| Build command | `npm run build` | `netlify.toml` |
+| Publish directory | *(tanımlanmaz)* | runtime belirler |
+| Node.js sürümü | `20` | `netlify.toml` + `.nvmrc` + `package.json > engines` |
+| Functions runtime | Node.js | tüm API route'larında `export const runtime = "nodejs"` |
+
+`netlify.toml` içindeki `[functions]` bloğu şunları sağlar:
+
+- `external_node_modules = ["better-sqlite3"]` — native `.node` dosyası bundle
+  edilmek yerine olduğu gibi paketlenir.
+- `included_files` — `data/pastamarket.db`, `public/images/**` ve
+  `better-sqlite3` modülü fonksiyon paketine dahil edilir.
+
+### Netlify panelinde tanımlanacak environment variable'lar
+
+| Değişken | Değer | Zorunlu |
+| --- | --- | --- |
+| `DEMO_READ_ONLY` | `true` | evet |
+| `ADMIN_EMAIL` | panel giriş e-postanız | evet |
+| `ADMIN_PASSWORD_HASH` | `npm run admin:create-password` çıktısı | evet |
+| `ADMIN_SESSION_SECRET` | 32 baytlık rastgele hex | evet |
+
+Bu dört değişken **hem build hem runtime** için tanımlı olmalıdır (Netlify'da
+varsayılan davranış budur). `DEMO_READ_ONLY` build sırasında da okunur; böylece
+derleme adımı veritabanına yazmaya çalışmaz.
+
+`ADMIN_PASSWORD_HASH` değerini Netlify arayüzüne yapıştırırken `$` karakterlerini
+**kaçırmayın** — Netlify değeri olduğu gibi saklar. Kaçış (`\$`) yalnızca yerel
+`.env` dosyaları için gereklidir.
+
+İsteğe bağlı (varsayılanları vardır, tanımlamasanız da çalışır):
+`DEMO_MODE`, `DATA_PROVIDER`, `IMAGE_PROVIDER`, `SQLITE_DATABASE_PATH`,
+`LOCAL_UPLOAD_DIR`.
+
+### Deploy öncesi: veritabanını hazırlayın
+
+```bash
+npm run db:prepare-demo
+```
+
+Yerel geliştirmede veritabanı WAL modunda çalışır ve veriler `-wal` yan dosyasında
+bekleyebilir. Bu komut WAL içeriğini ana dosyaya yazar, `journal_mode`'u `delete`
+yapar ve dosyayı küçültür; böylece deploy edilen tek `.db` dosyası kendi kendine
+yeter ve salt-okunur açılabilir. **Veritabanını commit etmeden önce çalıştırın.**
+
+### Canlı demoda kapalı olan işlemler
+
+`DEMO_READ_ONLY=true` iken aşağıdakiler 403 ve şu mesajla reddedilir:
+*"Demo sürümünde değişiklikler kapalıdır. Kalıcı yönetim Firebase ve ImgBB
+bağlantısından sonra aktif olacaktır."*
+
+- Ürün ekleme / düzenleme / silme / aktif-pasif
+- Kategori ekleme / düzenleme / silme
+- Sipariş durumu değiştirme
+- Ayar değiştirme
+- Görsel yükleme
+- Sipariş oluşturma (checkout)
+
+Çalışmaya devam edenler: mağaza sayfaları, arama, kategori ve ürün detayı, sepet
+(tarayıcıda tutulur), checkout formunun görüntülenmesi, panel girişi ve tüm panel
+ekranlarının okunması.
+
+Yerel geliştirmede `DEMO_READ_ONLY` tanımsızdır; tüm yazma özellikleri aynen çalışır.
+
 ## İleride Firebase / ImgBB geçişi
 
 Arayüzü yeniden yazmadan geçebilmek için üç katman ayrılmıştır:

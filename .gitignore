@@ -1,0 +1,29 @@
+# bağımlılıklar
+/node_modules
+
+# Next.js build çıktıları ve cache
+/.next
+/.next-build-cache*
+/out
+next-env.d.ts
+*.tsbuildinfo
+
+# ortam değişkenleri
+.env
+.env.local
+.env.*.local
+
+# veritabanı (yerel geliştirme)
+/data/*.db-shm
+/data/*.db-wal
+
+# yönetim panelinden yüklenen görseller
+/public/uploads/*
+!/public/uploads/.gitkeep
+
+# işletim sistemi
+.DS_Store
+*.log
+
+# yerel veritabanı yedekleri (deploy edilmez)
+/data/backups/

@@ -1,0 +1,42 @@
+# Netlify yapılandırması — PastaMarket demo
+#
+# Next.js runtime'ı (OpenNext tabanlı) Netlify tarafından otomatik algılanır ve
+# kurulur. Eski @netlify/plugin-nextjs BİLEREK eklenmemiştir; [[plugins]] bloğu
+# yoktur. "publish" de tanımlanmaz — Next.js çıktısının yerini runtime belirler.
+
+[build]
+  command = "npm run build"
+
+[build.environment]
+  NODE_VERSION = "20"
+  # better-sqlite3 native modülünün derlenmiş sürümü kurulmalı.
+  NPM_FLAGS = "--include=optional"
+
+# Sunucu tarafı fonksiyonlar (Next.js sayfaları ve API route'ları)
+[functions]
+  # better-sqlite3 native (.node) dosya içerir; bundle edilmek yerine
+  # node_modules'tan olduğu gibi paketlenmelidir.
+  external_node_modules = ["better-sqlite3"]
+
+  # SQLite veritabanı ve yerel görseller fonksiyon paketine dahil edilir.
+  # Yol repo köküne görelidir ve pakette aynı yapıyla korunur.
+  included_files = [
+    "data/pastamarket.db",
+    "public/images/**",
+    "node_modules/better-sqlite3/**",
+    "node_modules/bindings/**",
+    "node_modules/file-uri-to-path/**",
+    # Yerel yedekler pakete girmesin (boyut).
+    "!data/backups/**",
+  ]
+
+# Yüklenen görseller ve statik dosyalar uzun süre önbelleklenebilir.
+[[headers]]
+  for = "/images/*"
+  [headers.values]
+    Cache-Control = "public, max-age=3600, must-revalidate"
+
+[[headers]]
+  for = "/_next/static/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
