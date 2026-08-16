@@ -48,33 +48,86 @@ function resolveDatabaseFile() {
   return target;
 }
 
-const file = resolveDatabaseFile();
+/**
+ * Build sırasında mıyız? Next.js "Collecting page data" adımında her sayfa
+ * modülünü ayrı worker süreçlerinde import eder. O anda veritabanına ihtiyaç
+ * yoktur; yazma da yapılmamalıdır.
+ */
+const isBuildPhase = () => process.env.NEXT_PHASE === "phase-production-build";
 
-// Bağlantı süreç başına bir kez kurulur; her istekte yeniden açılmaz.
-const globalDb = globalThis as unknown as { pastaDb?: Database.Database };
-export const db =
-  globalDb.pastaDb ??
-  new Database(
+/** Bağlantı salt-okunur mu açılmalı? (canlı demo veya build) */
+const openReadOnly = () => config.demoReadOnly || isBuildPhase();
+
+/** Açılışta şema/migration/seed çalıştırılabilir mi? */
+const canInitialize = () => !config.demoReadOnly && !isBuildPhase();
+
+type GlobalWithDb = typeof globalThis & { __pastaDb?: Database.Database };
+const globalRef = globalThis as GlobalWithDb;
+
+let connection: Database.Database | null = null;
+
+/**
+ * Tembel (lazy) bağlantı.
+ *
+ * ÖNEMLİ: Bu modül import edildiğinde HİÇBİR bağlantı açılmaz, native modül
+ * çalıştırılmaz ve yazma yapılmaz. Bağlantı yalnızca ilk gerçek sorguda
+ * kurulur. Böylece Next.js build worker'ları (8 paralel süreç) veritabanına
+ * hiç dokunmaz.
+ *
+ * Süreç başına tek bağlantı tutulur; globalThis üzerinden saklandığı için
+ * dev sunucusunun sıcak yeniden yüklemelerinde de çoğalmaz.
+ */
+export function getDb(): Database.Database {
+  if (connection) return connection;
+  if (globalRef.__pastaDb) {
+    connection = globalRef.__pastaDb;
+    return connection;
+  }
+
+  const file = resolveDatabaseFile();
+  const readonly = openReadOnly();
+
+  const instance = new Database(
     file,
-    // Canlı demoda dosya salt-okunur açılır ve mutlaka var olmalıdır.
-    config.demoReadOnly ? { readonly: true, fileMustExist: true } : {},
+    readonly ? { readonly: true, fileMustExist: true } : {},
   );
-globalDb.pastaDb = db;
 
-db.pragma("foreign_keys = ON");
-// Build sırasında birden fazla worker aynı anda açılış yazımı yapabilir;
-// kilit görüldüğünde hata vermek yerine kısa süre beklenir.
-db.pragma("busy_timeout = 10000");
+  instance.pragma("foreign_keys = ON");
+  // Kilit görülürse hata vermek yerine kısa süre beklenir.
+  instance.pragma("busy_timeout = 10000");
 
-// journal_mode değişikliği bir yazma işlemidir; salt-okunur bağlantıda
-// çalıştırılamaz. Demo veritabanı deploy öncesi "delete" moduna alınır
-// (npm run db:prepare-demo), böylece tek dosya olarak kendi kendine yeter.
-// Zaten WAL ise tekrar yazılmaz: build sırasında paralel worker'ların
-// aynı anda mod değiştirmeye çalışıp kilitlenmesini önler.
-if (!config.demoReadOnly) {
-  const mode = db.pragma("journal_mode", { simple: true });
-  if (mode !== "wal") db.pragma("journal_mode = WAL");
+  // journal_mode değişikliği bir YAZMA işlemidir; salt-okunur bağlantıda
+  // çalıştırılamaz. Zaten WAL ise tekrar yazılmaz.
+  if (!readonly) {
+    const mode = instance.pragma("journal_mode", { simple: true });
+    if (mode !== "wal") instance.pragma("journal_mode = WAL");
+  }
+
+  // Bağlantıyı önce yayınla: initialize() içindeki sorgular getDb() çağırırsa
+  // sonsuz döngüye girilmesin.
+  connection = instance;
+  globalRef.__pastaDb = instance;
+
+  if (canInitialize()) initialize();
+  else if (config.demoReadOnly) {
+    console.info("[PastaMarket] Demo salt-okunur mod: açılış yazımları atlandı.");
+  }
+
+  return instance;
 }
+
+/**
+ * Geriye dönük uyumluluk için `db` erişimi.
+ * Özellik okunduğu anda bağlantı kurulur (import anında değil).
+ */
+export const db = new Proxy({} as Database.Database, {
+  get(_target, property, receiver) {
+    const instance = getDb();
+    const value = Reflect.get(instance, property, instance);
+    return typeof value === "function" ? value.bind(instance) : value;
+  },
+  has: (_target, property) => property in getDb(),
+});
 
 function ensureSchema() {
   db.exec(`
@@ -545,9 +598,23 @@ type ProductRow = {
   is_new: number;
 };
 
-const variantsOf = db.prepare(
-  "SELECT id,name,option_label as optionLabel,price,sku FROM variants WHERE product_id=? ORDER BY price",
-);
+/**
+ * Sık kullanılan sorgu, bağlantı başına bir kez hazırlanır.
+ * Modül seviyesinde prepare edilmez; aksi hâlde import anında bağlantı açılırdı.
+ */
+let variantsStatement: Database.Statement | null = null;
+let variantsStatementOwner: Database.Database | null = null;
+
+function variantsOf(productId: number) {
+  const instance = getDb();
+  if (!variantsStatement || variantsStatementOwner !== instance) {
+    variantsStatement = instance.prepare(
+      "SELECT id,name,option_label as optionLabel,price,sku FROM variants WHERE product_id=? ORDER BY price",
+    );
+    variantsStatementOwner = instance;
+  }
+  return variantsStatement.all(productId) as Variant[];
+}
 
 function productFrom(row: ProductRow): Product {
   let images: string[] = [];
@@ -579,7 +646,7 @@ function productFrom(row: ProductRow): Product {
     active: !!row.active,
     isBestSeller: !!row.is_best_seller,
     isNew: !!row.is_new,
-    variants: variantsOf.all(row.id) as Variant[],
+    variants: variantsOf(row.id),
   };
 }
 
@@ -835,15 +902,13 @@ function schemaIsCurrent() {
 }
 
 /**
- * Açılış işlemleri.
+ * Açılış işlemleri (şema, migration, seed).
  *
- * Canlı demoda (DEMO_READ_ONLY=true) hiçbiri çalışmaz: şema oluşturma,
- * migration, seed ve upsert adımlarının tamamı atlanır. Veritabanı yalnızca
- * okunur; deploy edilen dosya olduğu gibi kullanılır.
+ * Yalnızca yazılabilir ortamda ve ilk gerçek bağlantı kurulduğunda çalışır.
+ * Canlı demoda (DEMO_READ_ONLY=true) ve Next.js build aşamasında hiç
+ * çağrılmaz — bkz. canInitialize().
  */
-if (config.demoReadOnly) {
-  console.info("[PastaMarket] Demo salt-okunur mod: açılış yazımları atlandı.");
-} else {
+function initialize() {
   if (!schemaIsCurrent()) {
     ensureSchema();
     migrate();
