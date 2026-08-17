@@ -1,29 +1,38 @@
 import Link from "next/link";
 import { Suspense } from "react";
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { ChevronRight } from "lucide-react";
-import { categories, products } from "@/lib/data";
-import { ProductImage } from "@/components/product-image";
+import { getCategories, getCategoryBySlug, getProductsByCategory } from "@/lib/catalog";
 import { hasImage } from "@/lib/product-images";
+import { ProductImage } from "@/components/product-image";
 import { StoreShell } from "@/components/store-shell";
-import { ProductCard } from "@/components/product-card";
-import { SortSelect } from "@/components/sort-select";
+import { ProductList } from "@/components/product-list";
 
-export const dynamic = "force-dynamic";
+/** Tüm kategori sayfaları build sırasında JSON verisinden üretilir. */
+export function generateStaticParams() {
+  return getCategories().map((category) => ({ slug: category.slug }));
+}
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}): Promise<Metadata> {
+  const category = getCategoryBySlug((await params).slug);
+  return { title: category ? `${category.name} | PastaMarket` : "Kategori | PastaMarket" };
+}
 
 export default async function CategoryPage({
   params,
-  searchParams,
 }: {
   params: Promise<{ slug: string }>;
-  searchParams: Promise<{ sort?: string }>;
 }) {
   const { slug } = await params;
-  const { sort } = await searchParams;
-  const category = (await categories()).find((item) => item.slug === slug);
+  const category = getCategoryBySlug(slug);
   if (!category) notFound();
 
-  const list = await products({ category: slug, sort });
+  const list = getProductsByCategory(slug);
 
   return (
     <StoreShell>
@@ -67,24 +76,12 @@ export default async function CategoryPage({
           </div>
         </div>
 
-        <div className="my-6 flex flex-wrap items-center justify-between gap-3">
-          <p className="text-sm text-muted">{list.length} ürün</p>
-          <Suspense fallback={null}>
-            <SortSelect value={sort} />
-          </Suspense>
-        </div>
-
-        {list.length > 0 ? (
-          <div className="product-grid">
-            {list.map((product) => (
-              <ProductCard key={product.id} product={product} />
-            ))}
-          </div>
-        ) : (
-          <p className="rounded-2xl bg-brand-soft p-8 text-center text-sm text-muted">
-            Bu kategoride şu anda satışta ürün bulunmuyor.
-          </p>
-        )}
+        {/* useSearchParams istemci tarafında çalışır; statik kabuk Suspense ile sunulur. */}
+        <Suspense
+          fallback={<p className="mt-6 text-sm text-muted">Ürünler yükleniyor…</p>}
+        >
+          <ProductList products={list} showCategoryFilter={false} />
+        </Suspense>
       </main>
     </StoreShell>
   );

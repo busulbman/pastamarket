@@ -3,8 +3,8 @@
 
 # Next.js build çıktıları ve cache
 /.next
-/.next-build-cache*
 /out
+/.next-build-cache*
 next-env.d.ts
 *.tsbuildinfo
 
@@ -14,6 +14,7 @@ next-env.d.ts
 .env.*.local
 
 # veritabanı (yerel geliştirme)
+/data/*.db
 /data/*.db-shm
 /data/*.db-wal
 

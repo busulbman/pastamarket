@@ -1,13 +1,12 @@
 import type { Metadata } from "next";
-import { settings } from "@/lib/data";
+import { getSettings } from "@/lib/catalog";
 import { districtList, money } from "@/lib/format";
 import { InfoPage } from "@/components/info-page";
 
-export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Teslimat ve İade | PastaMarket" };
 
-export default async function DeliveryPage() {
-  const s = await settings();
+export default function DeliveryPage() {
+  const s = getSettings();
   const districts = districtList(s.courier_districts);
 
   const rules = [

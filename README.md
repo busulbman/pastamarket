@@ -1,294 +1,87 @@
-# PastaMarket
+# PastaMarket — statik müşteri demosu
 
-Next.js 15 (App Router), React 19, Tailwind CSS v4 ve SQLite ile çalışan pastacılık
-malzemeleri mağazası. Şu an **demo modunda**: veriler SQLite'ta, görseller yerel
-`public/uploads` klasöründe tutulur.
+Next.js 15 (App Router), React 19 ve Tailwind CSS v4 ile hazırlanmış pastacılık
+malzemeleri mağazası. Bu branch (`main`) **tamamen statik** bir vitrindir:
+sunucu, veritabanı, API route ve native modül yoktur.
 
-## Kurulum
+Panel, SQLite, sipariş veritabanı ve kimlik doğrulama içeren tam sürüm
+**`fullstack-backup`** branch'inde durmaktadır. Firebase/ImgBB bağlandığında
+oradan geri alınacaktır.
+
+## Çalıştırma
 
 ```bash
 npm install
-cp .env.example .env.local
-npm run admin:create-password   # panel parolası için bcrypt hash üretir
-npm run dev                     # http://localhost:3000
+npm run dev        # http://localhost:3000
+npm run typecheck  # tsc --noEmit
+npm run build      # statik çıktı -> out/
 ```
 
-### Panel parolası
-
-`npm run admin:create-password` parolayı ekranda göstermeden sorar, bcrypt hash'ini
-üretir ve isterseniz `.env.local` dosyasına yazar. **Parolanın kendisi hiçbir yere
-yazılmaz** — ne dosyaya, ne terminal geçmişine, ne loglara.
-
-Ardından `.env.local` içinde `ADMIN_EMAIL` değerini de doldurun ve dev sunucusunu
-yeniden başlatın.
-
-> **Dikkat:** bcrypt hash'i `$` karakteri içerir. Next.js `.env` dosyalarını
-> dotenv-expand ile okuduğu için kaçırılmamış `$2b` bir değişken sanılır ve hash
-> bozulur (giriş sessizce başarısız olur). Bu yüzden `$` karakterleri `\$` olarak
-> yazılmalıdır:
->
-> ```
-> ADMIN_PASSWORD_HASH='\$2b\$12\$abc...'
-> ```
->
-> Script bu kaçışı otomatik uygular. Hash bozuksa sunucu günlüğünde açık bir uyarı
-> yazılır.
-
-### Oturum anahtarı
+Build sonrası çıktıyı yerelde denemek için:
 
 ```bash
-node -e "console.log(require('node:crypto').randomBytes(32).toString('hex'))"
+npx serve out
 ```
 
-Çıktıyı `ADMIN_SESSION_SECRET` değerine yazın. En az 16 karakter olmalıdır.
+## Mimari
 
-### Üretim davranışı
-
-Gerekli ENV değerlerinden biri eksik veya bozuksa panel girişi **reddedilir**;
-hiçbir koşulda varsayılan bir parolaya düşülmez. Geliştirme ortamında giriş
-ekranında hangi anahtarların eksik olduğu (değerleri değil, yalnızca adları)
-gösterilir.
-
-## Komutlar
-
-| Komut | Açıklama |
+| Konu | Nasıl |
 | --- | --- |
-| `npm run dev` | Geliştirme sunucusu |
-| `npm run build` | Üretim derlemesi |
-| `npm run start` | Derlenmiş uygulamayı çalıştırır |
-| `npm run typecheck` | `tsc --noEmit` |
-| `npm run admin:create-password` | Panel parolası için bcrypt hash üretir |
+| Veri kaynağı | `data/demo-catalog.json` — **build sırasında** okunur ve sayfalara gömülür |
+| Çıktı | `output: "export"` → `out/` klasörü |
+| Ürün sayfaları | `generateStaticParams` ile 44 ürün için önceden üretilir |
+| Kategori sayfaları | `generateStaticParams` ile 9 kategori için önceden üretilir |
+| Arama / filtre / sıralama | Tarayıcıda, gömülü katalog üzerinde (`components/product-list.tsx`) |
+| Sepet | `localStorage` (`components/cart.tsx`) |
+| Sipariş | Veritabanına yazmaz; hazır WhatsApp mesajı üretir (`/siparis`) |
+| Görseller | `public/images/products/` — dosya yoksa `product-placeholder.svg` |
 
-## Panel adresleri
+Statik export'ta `next/image` optimizasyon sunucusu bulunmadığı için
+`images: { unoptimized: true }` kullanılır.
 
-| Adres | Ekran |
+## Katalog güncelleme
+
+`data/demo-catalog.json` bu branch'te verinin tek kaynağıdır. Ürün/kategori
+değişikliği için ya dosyayı doğrudan düzenleyin ya da `fullstack-backup`
+branch'inde `npm run demo:export` çalıştırıp üretilen dosyayı buraya kopyalayın.
+
+Dosya biçimi:
+
+```json
+{
+  "meta":       { "exportedAt": "...", "counts": { … } },
+  "settings":   { "brand_name": "...", "whatsapp": "...", … },
+  "categories": [ { "id": 1, "name": "...", "slug": "...", … } ],
+  "products":   [ { "id": 1, "slug": "...", "price": 210, "variants": [ … ] } ]
+}
+```
+
+## Netlify ayarları
+
+| Ayar | Değer |
 | --- | --- |
-| `/panel/login` | Giriş (korumalı alanın dışındadır) |
-| `/panel` | Kontrol paneli — özet sayılar ve son siparişler |
-| `/panel/urunler` | Ürün listesi (arama, kategori/durum filtresi, sayfalama) |
-| `/panel/urunler/yeni` | Yeni ürün |
-| `/panel/urunler/[id]` | Ürün düzenleme |
-| `/panel/kategoriler` | Kategori yönetimi |
-| `/panel/siparisler` | Sipariş listesi, detay ve durum değiştirme |
-| `/panel/ayarlar` | İletişim, teslimat, ödeme ve içerik ayarları |
+| Build command | `npm run build` |
+| Publish directory | `out` |
+| Node.js sürümü | 20 |
+| Functions | **yok** |
+| `@netlify/plugin-nextjs` | **yok** |
+| Environment variable | **gerekmiyor** |
 
-Eski `/admin/*` adresleri karşılıklarına kalıcı (308) yönlendirilir.
+`netlify.toml` yalnızca build komutu, publish klasörü, Node sürümü ve statik
+dosya cache başlıklarını içerir.
 
-## Yapı
+## Site içeriği
 
-| Klasör | İçerik |
-| --- | --- |
-| `app/` | Sayfalar ve API route'ları |
-| `app/panel/(korumali)/` | Oturum korumalı panel ekranları |
-| `app/api/panel/` | Panel API'leri (her biri oturumu ayrıca doğrular) |
-| `components/panel/` | Panel arayüz bileşenleri |
-| `lib/auth/` | Oturum ve kimlik doğrulama sağlayıcısı |
-| `lib/images/` | Görsel yükleme sağlayıcısı |
-| `lib/db.ts` | SQLite veri erişim katmanı |
-| `data/backups/` | Tarihli veritabanı yedekleri |
+- 9 kategori, 44 ürün, 18 varyasyon
+- Ana sayfa: duyuru çubuğu, banner, kategori şeridi, çok satanlar, avantajlar,
+  yeni ürünler, alt banner
+- Ürün listesi, kategori sayfaları, ürün detayı, markalar
+- Sepet ve WhatsApp siparişi
+- İletişim ve kurumsal sayfalar (metinler `data/demo-catalog.json` içindeki
+  `settings` alanından gelir; boş olanlar gösterilmez)
 
 ## Tema
 
 Tüm renkler `app/globals.css` içindeki `@theme` bloğunda tanımlıdır
 (`--color-brand`, `--color-ink`, `--color-line` …). Bileşenlerde `bg-brand`,
 `text-ink`, `border-line` sınıfları kullanılır; dosyalara hex kodu yazılmaz.
-
-## İş kuralları
-
-- Üyelik yoktur; müşteri kayıt olmadan sipariş verir.
-- Online kredi kartı ödemesi alınmaz. Ödeme: kapıda nakit, kapıda fiziksel POS,
-  Havale/EFT (IBAN tanımlıysa gösterilir).
-- Kurye: ayarlarda tanımlı İstanbul ilçelerinde. 2.500 TL altı 120 TL, üzeri ücretsiz.
-- Kargo: Türkiye geneli. 3.500 TL ve üzeri ücretsiz, altında ayarlardaki ücret.
-- Ürünlerde gramaj, tür ve varyasyona göre fiyat desteklenir.
-- Sipariş tutarları **her zaman sunucuda** yeniden hesaplanır; istemciden gelen
-  fiyatlara güvenilmez. Tekrarlanan gönderimler idempotency anahtarıyla engellenir.
-
-## Ürün görselleri
-
-Görseller tamamen yereldir; dış kaynak (Unsplash vb.) kullanılmaz.
-
-- Ürün görselleri: `public/images/products/<slug>.jpg`
-- Eksik görsellerde `public/images/product-placeholder.svg` gösterilir.
-
-Dosyanın diskte olup olmadığı sunucuda (`lib/product-images.ts`) kontrol edilir ve
-sonuç veri katmanında çözülür. Bu sayede tarayıcıya hiçbir zaman var olmayan bir
-yol gönderilmez — 404 ve yeniden deneme döngüsü oluşmaz.
-
-Bir ürünün görselini yayına almak için dosyayı ilgili slug adıyla
-`public/images/products/` klasörüne kopyalamanız yeterlidir; kod değişikliği
-gerekmez.
-
-## Görsel yükleme (demo)
-
-`IMAGE_PROVIDER=local` iken görseller `public/uploads` altına, sunucuda üretilen
-benzersiz adlarla kaydedilir. Kullanıcıdan gelen dosya adı hiçbir zaman
-kullanılmaz. Sunucu tarafında MIME türü, uzantı ve boyut (en fazla 8 MB) doğrulanır;
-izin verilen türler JPEG, PNG, WEBP ve GIF'tir.
-
-Bu yöntem yalnızca tek makinede çalışan demo/geliştirme içindir. Vercel gibi
-efemer dosya sistemine sahip ortamlarda yüklenen görseller kalıcı olmaz.
-
-
-## Netlify'a demo yayını
-
-Next.js runtime'ı (OpenNext tabanlı, **v5**) Netlify tarafından otomatik algılanır.
-`netlify.toml` içine bilerek `[[plugins]]` bloğu **eklenmemiştir** ve hiçbir sürüm
-sabitlenmemiştir. `publish` klasörü de tanımlı değildir — çıktının yerini runtime
-belirler. Static export kullanılmaz: App Router, API route'ları, sepet, checkout ve
-panel sunucu tarafında çalışmaya devam eder.
-
-### Build ayarları
-
-| Ayar | Değer | Nerede tanımlı |
-| --- | --- | --- |
-| Build command | `npm run build` | `netlify.toml` |
-| Publish directory | *(tanımlanmaz)* | runtime belirler |
-| Node.js sürümü | `20` | `netlify.toml` + `.nvmrc` + `package.json > engines` |
-| Functions runtime | Node.js | tüm API route'larında `export const runtime = "nodejs"` |
-
-`netlify.toml` içindeki `[functions]` bloğu şunları sağlar:
-
-- `external_node_modules = ["better-sqlite3"]` — native `.node` dosyası bundle
-  edilmek yerine olduğu gibi paketlenir.
-- `included_files` — `data/pastamarket.db`, `public/images/**` ve
-  `better-sqlite3` modülü fonksiyon paketine dahil edilir.
-
-### Netlify panelinde tanımlanacak environment variable'lar
-
-| Değişken | Değer | Zorunlu |
-| --- | --- | --- |
-| `DEMO_READ_ONLY` | `true` | evet |
-| `ADMIN_EMAIL` | panel giriş e-postanız | evet |
-| `ADMIN_PASSWORD_HASH` | `npm run admin:create-password` çıktısı | evet |
-| `ADMIN_SESSION_SECRET` | 32 baytlık rastgele hex | evet |
-
-Bu beş değişken **hem build hem runtime** için tanımlı olmalıdır (Netlify'da
-varsayılan davranış budur). `DEMO_READ_ONLY` build sırasında da okunur; böylece
-derleme adımı veritabanına yazmaya çalışmaz.
-
-`ADMIN_PASSWORD_HASH` için Netlify arayüzüne düz hash'i yapıştırmanız yeterlidir.
-Uygulama değeri okurken şunlara toleranslıdır ve hepsini doğru çözer:
-
-- düz hash — `$2b$12$…`
-- kaçışlı hash — `\$2b\$12\$…` (script çıktısından kopyalanmışsa)
-- tırnak içinde — `'$2b$12$…'` veya `"$2b$12$…"`
-- baştaki/sondaki boşluklar
-
-`$2a$`, `$2b$` ve `$2y$` önekleri kabul edilir; değerin tam 60 karakter olması
-şartı aranır. `ADMIN_SESSION_SECRET` için en az 16 karakter gerekir (önerilen:
-32 baytlık hex = 64 karakter).
-
-**Yapılandırma çalışma zamanında okunur.** ADMIN_* değerleri build sırasında
-paketlenmez; Netlify'da değişkeni güncelleyip yeniden deploy etmek yeterlidir.
-Giriş formu her koşulda kullanılabilir — yapılandırma eksikse sorun yalnızca
-gönderimden sonra genel bir hata olarak bildirilir ve sunucu günlüğüne
-**değer içermeyen** bir özet yazılır:
-
-```
-[PastaMarket] Panel kimlik yapılandırması eksik (giriş denemesi):
-{"hasAdminEmail":true,"hasPasswordHash":true,"passwordHashLength":17,
- "passwordHashValid":false,"hasSessionSecret":true,"sessionSecretLength":64,
- "missing":["ADMIN_PASSWORD_HASH (biçim geçersiz)"]}
-```
-
-`DEMO_READ_ONLY=true` panel **girişini engellemez**; yalnızca yazma işlemlerini
-kapatır.
-
-İsteğe bağlı (varsayılanları vardır, tanımlamasanız da çalışır):
-`DEMO_MODE`, `DATA_PROVIDER`, `IMAGE_PROVIDER`, `SQLITE_DATABASE_PATH`,
-`LOCAL_UPLOAD_DIR`.
-
-### Deploy öncesi: veritabanını hazırlayın
-
-```bash
-npm run db:prepare-demo
-```
-
-Yerel geliştirmede veritabanı WAL modunda çalışır ve veriler `-wal` yan dosyasında
-bekleyebilir. Bu komut WAL içeriğini ana dosyaya yazar, `journal_mode`'u `delete`
-yapar ve dosyayı küçültür; böylece deploy edilen tek `.db` dosyası kendi kendine
-yeter ve salt-okunur açılabilir. **Veritabanını commit etmeden önce çalıştırın.**
-
-### Canlı demoda kapalı olan işlemler
-
-`DEMO_READ_ONLY=true` iken aşağıdakiler 403 ve şu mesajla reddedilir:
-*"Demo sürümünde değişiklikler kapalıdır. Kalıcı yönetim Firebase ve ImgBB
-bağlantısından sonra aktif olacaktır."*
-
-- Ürün ekleme / düzenleme / silme / aktif-pasif
-- Kategori ekleme / düzenleme / silme
-- Sipariş durumu değiştirme
-- Ayar değiştirme
-- Görsel yükleme
-- Sipariş oluşturma (checkout)
-
-Çalışmaya devam edenler: mağaza sayfaları, arama, kategori ve ürün detayı, sepet
-(tarayıcıda tutulur), checkout formunun görüntülenmesi, panel girişi ve tüm panel
-ekranlarının okunması.
-
-Yerel geliştirmede `DEMO_READ_ONLY` tanımsızdır; tüm yazma özellikleri aynen çalışır.
-
-
-## Veri sağlayıcıları
-
-Uygulama iki veri kaynağıyla çalışabilir; seçim `DATA_PROVIDER` ile yapılır.
-
-| Değer | Kullanım | Kaynak |
-| --- | --- | --- |
-| `sqlite` (varsayılan) | Yerel geliştirme | `data/pastamarket.db` (better-sqlite3) |
-| `json` | Netlify demo | `data/demo-catalog.json` (salt-okunur) |
-
-`DATA_PROVIDER=json` iken **better-sqlite3 hiç yüklenmez**: native binding
-açılmaz, SQLite bağlantısı kurulmaz. Bunun için iki önlem alınmıştır:
-
-1. Sağlayıcı seçimi `lib/data/index.ts` içinde **dinamik import** ile yapılır;
-   JSON modunda `lib/data/sqlite-provider.ts` hiç import edilmez.
-2. `lib/db.ts` sürücüyü statik `import` ile değil, çalışma zamanında
-   `eval("require")("better-sqlite3")` ile yükler. Webpack bu ifadeyi statik
-   olarak çözemediği için hiçbir chunk'a `require("better-sqlite3")` girmez.
-   (Statik import kullanıldığında webpack modülü her sayfa chunk'ına "external"
-   olarak ekliyor ve Next.js'in `unstable_preloadEntries` adımı onu sunucu
-   açılışında değerlendiriyordu — Netlify Lambda'sında fonksiyon bu yüzden
-   JS hatası üretmeden çöküyordu.)
-
-Ortak dosyaların hiçbirinde better-sqlite3 için top-level import yoktur.
-Panel yazma işlemleri de `@/lib/data` üzerinden geçer; route dosyalarında
-`@/lib/db` referansı bulunmaz.
-
-### Demo kataloğunu üretme
-
-```bash
-npm run demo:export
-```
-
-`data/pastamarket.db` içindeki **aktif** kategori, ürün, varyasyon, fiyat ve
-mağaza ayarlarını `data/demo-catalog.json` dosyasına yazar. Sayılar koda
-sabitlenmez; yazımdan sonra dosya geri okunup veritabanıyla karşılaştırılır,
-uyuşmazlıkta script hata verir. Katalog değiştiğinde yeniden çalıştırıp
-JSON dosyasını commit edin.
-
-### Sağlık kontrolü
-
-| Uç | Ne yapar |
-| --- | --- |
-| `/api/health` | Veri kaynağına hiç dokunmadan `{ ok, provider, writable, demoReadOnly }` döner |
-| `/api/health/data` | Aktif sağlayıcıdan kategori ve ürün sayısını okur; hata durumunda 503 |
-
-### Demo modunda kapalı olanlar
-
-`DATA_PROVIDER=json` + `DEMO_READ_ONLY=true` iken sipariş kaydı ve tüm panel
-yazma işlemleri 403 döner. Sepet tarayıcıda çalışmaya devam eder; müşteri
-siparişini WhatsApp üzerinden iletebilir.
-
-## İleride Firebase / ImgBB geçişi
-
-Arayüzü yeniden yazmadan geçebilmek için üç katman ayrılmıştır:
-
-| Katman | Bugün | Geçişte değişecek dosya |
-| --- | --- | --- |
-| Veri | SQLite / JSON | `lib/data/` altına yeni sağlayıcı eklenir |
-| Görsel | `public/uploads` | `lib/images/index.ts` + yeni `lib/images/imgbb.ts` |
-| Kimlik | ENV + bcrypt | `lib/auth/provider.ts` (yeni sağlayıcı eklenir) |
-
-Panel bileşenleri, route guard'ları ve oturum katmanı bu geçişlerden etkilenmez.

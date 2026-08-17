@@ -1,13 +1,12 @@
 import Link from "next/link";
 import type { Metadata } from "next";
-import { brands } from "@/lib/data";
+import { getBrands } from "@/lib/catalog";
 import { StoreShell } from "@/components/store-shell";
 
-export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Markalar | PastaMarket" };
 
-export default async function BrandsPage() {
-  const list = await brands();
+export default function BrandsPage() {
+  const list = getBrands();
 
   return (
     <StoreShell>

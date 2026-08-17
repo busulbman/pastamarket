@@ -2,20 +2,28 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { ChevronRight } from "lucide-react";
-import { productBySlug, products, settings } from "@/lib/data";
+import {
+  getProductBySlug,
+  getProducts,
+  getProductsByCategory,
+  getSettings,
+} from "@/lib/catalog";
 import { StoreShell } from "@/components/store-shell";
 import { ProductCard } from "@/components/product-card";
 import { ProductDetail } from "@/components/product-detail";
 import { SectionHeading } from "@/components/section-heading";
 
-export const dynamic = "force-dynamic";
+/** Tüm ürün sayfaları build sırasında JSON verisinden üretilir. */
+export function generateStaticParams() {
+  return getProducts().map((product) => ({ slug: product.slug }));
+}
 
 export async function generateMetadata({
   params,
 }: {
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
-  const product = await productBySlug((await params).slug);
+  const product = getProductBySlug((await params).slug);
   if (!product) return { title: "Ürün bulunamadı | PastaMarket" };
   return {
     title: `${product.name} | PastaMarket`,
@@ -28,16 +36,16 @@ export default async function ProductPage({
 }: {
   params: Promise<{ slug: string }>;
 }) {
-  const product = await productBySlug((await params).slug);
+  const product = getProductBySlug((await params).slug);
   if (!product) notFound();
 
   // Önceki sürümde benzer ürünler kategoriden bağımsız 4 kayıt çekip
   // filtrelediği için çoğu üründe boş kalıyordu.
-  const similar = (await products({ category: product.categorySlug, limit: 6 }))
+  const similar = getProductsByCategory(product.categorySlug ?? "")
     .filter((item) => item.id !== product.id)
     .slice(0, 5);
 
-  const s = await settings();
+  const s = getSettings();
 
   return (
     <StoreShell>

@@ -1,26 +1,4 @@
-/** Sunucu ve istemci tarafında ortak kullanılan sabitler (veritabanına bağlı değildir). */
-
-export const ORDER_STATUSES = [
-  "Yeni Sipariş",
-  "Hazırlanıyor",
-  "Kuryeye Verildi",
-  "Kargoya Verildi",
-  "Teslim Edildi",
-  "İptal Edildi",
-] as const;
-
-export type OrderStatus = (typeof ORDER_STATUSES)[number];
-
-export const PAYMENT_LABELS: Record<string, string> = {
-  cash: "Kapıda nakit ödeme",
-  card_at_door: "Kapıda kartla ödeme (fiziksel POS)",
-  bank_transfer: "Havale / EFT",
-};
-
-export const DELIVERY_LABELS: Record<string, string> = {
-  courier: "Aynı gün kurye",
-  shipping: "Türkiye geneli kargo",
-};
+/** Sunucu bağımlılığı olmayan, arayüzde paylaşılan sabitler. */
 
 /**
  * WhatsApp butonlarının varsayılan başlangıç mesajı.

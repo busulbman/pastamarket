@@ -1,32 +1,16 @@
-# Netlify yapılandırması — PastaMarket demo
+# Netlify — PastaMarket statik müşteri demosu
 #
-# Next.js runtime'ı (OpenNext tabanlı) Netlify tarafından otomatik algılanır ve
-# kurulur. Eski @netlify/plugin-nextjs BİLEREK eklenmemiştir; [[plugins]] bloğu
-# yoktur. "publish" de tanımlanmaz — Next.js çıktısının yerini runtime belirler.
+# Site tamamen statiktir: Function, SSR, API route ve native modül yoktur.
+# Bu yüzden Next.js runtime eklentisi (@netlify/plugin-nextjs) KULLANILMAZ;
+# [[plugins]], [functions] ve included_files tanımı bilerek yoktur.
 
 [build]
   command = "npm run build"
+  publish = "out"
 
 [build.environment]
   NODE_VERSION = "20"
 
-# Sunucu tarafı fonksiyonlar (Next.js sayfaları ve API route'ları)
-[functions]
-  # Demo (DATA_PROVIDER=json) salt-okunur JSON kataloğunu okur.
-  # better-sqlite3 hiç yüklenmediği için native modül pakete alınmaz.
-  included_files = [
-    "data/demo-catalog.json",
-    "public/images/**",
-    # Yerel yedekler ve SQLite dosyası pakete girmesin.
-    "!data/backups/**",
-    "!data/pastamarket.db",
-  ]
-
-  # better-sqlite3 JSON modunda hiç import edilmez; bundler'ın onu
-  # çözümlemeye çalışmaması için harici bırakılır.
-  external_node_modules = ["better-sqlite3"]
-
-# Yüklenen görseller ve statik dosyalar uzun süre önbelleklenebilir.
 [[headers]]
   for = "/images/*"
   [headers.values]

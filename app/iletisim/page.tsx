@@ -1,16 +1,15 @@
 import type { Metadata } from "next";
 import { Clock, MapPin, Phone } from "lucide-react";
-import { settings } from "@/lib/data";
+import { getSettings } from "@/lib/catalog";
 import { whatsappLink } from "@/lib/format";
 import { WHATSAPP_DEFAULT_MESSAGE } from "@/lib/constants";
 import { StoreShell } from "@/components/store-shell";
 import { InstagramIcon, WhatsAppIcon } from "@/components/icons";
 
-export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "İletişim | PastaMarket" };
 
-export default async function ContactPage() {
-  const s = await settings();
+export default function ContactPage() {
+  const s = getSettings();
   const whatsappHref = whatsappLink(s.whatsapp, WHATSAPP_DEFAULT_MESSAGE);
 
   // Yalnızca yönetim panelinden girilmiş gerçek bilgiler gösterilir.

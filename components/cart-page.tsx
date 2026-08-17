@@ -108,7 +108,7 @@ export function CartPage() {
             Teslimat ücreti, adres ve teslimat seçiminize göre ödeme adımında hesaplanır.
           </p>
           <Link
-            href="/checkout"
+            href="/siparis"
             className="mt-5 block rounded-full bg-brand py-3 text-center text-sm font-bold text-white transition hover:bg-brand-dark"
           >
             Siparişi Tamamla

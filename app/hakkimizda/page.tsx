@@ -1,12 +1,11 @@
 import type { Metadata } from "next";
-import { settings } from "@/lib/data";
+import { getSettings } from "@/lib/catalog";
 import { InfoPage } from "@/components/info-page";
 
-export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Hakkımızda | PastaMarket" };
 
-export default async function AboutPage() {
-  const s = await settings();
+export default function AboutPage() {
+  const s = getSettings();
 
   return (
     <InfoPage
