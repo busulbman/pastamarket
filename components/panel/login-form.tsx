@@ -4,7 +4,14 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { panelInput, panelLabel, primaryButton } from "@/components/panel/ui";
 
-export function LoginForm({ enabled }: { enabled: boolean }) {
+/**
+ * Panel giriş formu.
+ *
+ * Alanlar hiçbir koşulda disabled yapılmaz; sunucu yapılandırması eksik olsa
+ * bile kullanıcı e-posta ve parola yazabilir. Yapılandırma sorunu yalnızca
+ * gönderim sonrasında genel bir hata mesajıyla bildirilir.
+ */
+export function LoginForm() {
   const router = useRouter();
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
@@ -19,6 +26,7 @@ export function LoginForm({ enabled }: { enabled: boolean }) {
       const response = await fetch("/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        cache: "no-store",
         body: JSON.stringify({
           email: form.get("email"),
           password: form.get("password"),
@@ -52,7 +60,6 @@ export function LoginForm({ enabled }: { enabled: boolean }) {
           type="email"
           required
           autoComplete="username"
-          disabled={!enabled}
           className={panelInput}
         />
       </label>
@@ -64,7 +71,6 @@ export function LoginForm({ enabled }: { enabled: boolean }) {
           type="password"
           required
           autoComplete="current-password"
-          disabled={!enabled}
           className={panelInput}
         />
       </label>
@@ -75,7 +81,7 @@ export function LoginForm({ enabled }: { enabled: boolean }) {
         </p>
       )}
 
-      <button type="submit" disabled={busy || !enabled} className={`${primaryButton} mt-6 w-full`}>
+      <button type="submit" disabled={busy} className={`${primaryButton} mt-6 w-full`}>
         {busy ? "Giriş yapılıyor…" : "Giriş yap"}
       </button>
     </form>

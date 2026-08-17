@@ -1,5 +1,5 @@
 import bcrypt from "bcryptjs";
-import { adminAuthConfigured, config } from "@/lib/config";
+import { logAdminAuthProblem, readAdminAuthConfig } from "@/lib/config";
 
 /**
  * Kimlik doğrulama sağlayıcısı arayüzü.
@@ -20,17 +20,24 @@ export interface AuthProvider {
 const envProvider: AuthProvider = {
   name: "env",
   async verifyCredentials(email, password) {
-    if (!adminAuthConfigured()) return null;
+    // Yapılandırma HER denemede taze okunur.
+    const auth = readAdminAuthConfig();
+
+    if (!auth.configured) {
+      // Değer içermeyen tanı kaydı; kullanıcıya ayrıntı gösterilmez.
+      logAdminAuthProblem("giriş denemesi");
+      return null;
+    }
 
     const candidate = String(email ?? "").trim().toLowerCase();
     const secret = String(password ?? "");
 
     // E-posta yanlış olsa bile bcrypt karşılaştırmasını çalıştırarak
     // yanıt süresinden kullanıcı adı çıkarımını zorlaştırıyoruz.
-    const matchesHash = await bcrypt.compare(secret, config.adminPasswordHash);
-    if (candidate !== config.adminEmail || !matchesHash) return null;
+    const matchesHash = await bcrypt.compare(secret, auth.passwordHash);
+    if (candidate !== auth.email || !matchesHash) return null;
 
-    return { email: config.adminEmail };
+    return { email: auth.email };
   },
 };
 

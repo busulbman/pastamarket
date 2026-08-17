@@ -167,9 +167,33 @@ Bu beş değişken **hem build hem runtime** için tanımlı olmalıdır (Netlif
 varsayılan davranış budur). `DEMO_READ_ONLY` build sırasında da okunur; böylece
 derleme adımı veritabanına yazmaya çalışmaz.
 
-`ADMIN_PASSWORD_HASH` değerini Netlify arayüzüne yapıştırırken `$` karakterlerini
-**kaçırmayın** — Netlify değeri olduğu gibi saklar. Kaçış (`\$`) yalnızca yerel
-`.env` dosyaları için gereklidir.
+`ADMIN_PASSWORD_HASH` için Netlify arayüzüne düz hash'i yapıştırmanız yeterlidir.
+Uygulama değeri okurken şunlara toleranslıdır ve hepsini doğru çözer:
+
+- düz hash — `$2b$12$…`
+- kaçışlı hash — `\$2b\$12\$…` (script çıktısından kopyalanmışsa)
+- tırnak içinde — `'$2b$12$…'` veya `"$2b$12$…"`
+- baştaki/sondaki boşluklar
+
+`$2a$`, `$2b$` ve `$2y$` önekleri kabul edilir; değerin tam 60 karakter olması
+şartı aranır. `ADMIN_SESSION_SECRET` için en az 16 karakter gerekir (önerilen:
+32 baytlık hex = 64 karakter).
+
+**Yapılandırma çalışma zamanında okunur.** ADMIN_* değerleri build sırasında
+paketlenmez; Netlify'da değişkeni güncelleyip yeniden deploy etmek yeterlidir.
+Giriş formu her koşulda kullanılabilir — yapılandırma eksikse sorun yalnızca
+gönderimden sonra genel bir hata olarak bildirilir ve sunucu günlüğüne
+**değer içermeyen** bir özet yazılır:
+
+```
+[PastaMarket] Panel kimlik yapılandırması eksik (giriş denemesi):
+{"hasAdminEmail":true,"hasPasswordHash":true,"passwordHashLength":17,
+ "passwordHashValid":false,"hasSessionSecret":true,"sessionSecretLength":64,
+ "missing":["ADMIN_PASSWORD_HASH (biçim geçersiz)"]}
+```
+
+`DEMO_READ_ONLY=true` panel **girişini engellemez**; yalnızca yazma işlemlerini
+kapatır.
 
 İsteğe bağlı (varsayılanları vardır, tanımlamasanız da çalışır):
 `DEMO_MODE`, `DATA_PROVIDER`, `IMAGE_PROVIDER`, `SQLITE_DATABASE_PATH`,

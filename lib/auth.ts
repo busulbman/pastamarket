@@ -1,5 +1,5 @@
 import { cookies } from "next/headers";
-import { adminAuthConfigured } from "@/lib/config";
+import { adminAuthConfigured, readAdminAuthConfig } from "@/lib/config";
 import { getAuthProvider, type AdminIdentity } from "@/lib/auth/provider";
 import {
   createSessionToken,
@@ -15,6 +15,8 @@ export {
   sessionCookieOptions,
   createSessionToken,
   readSessionToken,
+  adminAuthConfigured,
+  readAdminAuthConfig,
 };
 export type { AdminIdentity };
 
@@ -31,12 +33,11 @@ export async function requireAdmin() {
 }
 
 /**
- * Giriş denemesi. Hatalı denemede ayrıntı verilmez; ENV eksikse de
- * aynı genel mesaj döner (yapılandırma bilgisi sızdırılmaz).
+ * Giriş denemesi.
+ *
+ * Yapılandırma eksik olsa bile aynı genel hata döner; kullanıcıya sistem
+ * bilgisi sızdırılmaz. Sebep yalnızca sunucu günlüğüne (değersiz) yazılır.
  */
 export async function signIn(email: unknown, password: unknown) {
-  if (!adminAuthConfigured()) return null;
   return getAuthProvider().verifyCredentials(String(email ?? ""), String(password ?? ""));
 }
-
-export { adminAuthConfigured };
