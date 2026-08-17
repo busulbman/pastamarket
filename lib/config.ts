@@ -20,7 +20,11 @@ export const demoReadOnly = process.env.DEMO_READ_ONLY === "true";
 export const config = {
   demoMode: process.env.DEMO_MODE !== "false",
   demoReadOnly,
-  dataProvider: (process.env.DATA_PROVIDER || "sqlite") as "sqlite",
+  /**
+   * "sqlite" → yerel geliştirme (better-sqlite3)
+   * "json"   → Netlify demo (data/demo-catalog.json, native modül yok)
+   */
+  dataProvider: (process.env.DATA_PROVIDER || "sqlite") as "sqlite" | "json",
   imageProvider: (process.env.IMAGE_PROVIDER || "local") as "local",
   sqlitePath: process.env.SQLITE_DATABASE_PATH || process.env.DATABASE_PATH || "./data/pastamarket.db",
   uploadDir: process.env.LOCAL_UPLOAD_DIR || "./public/uploads",

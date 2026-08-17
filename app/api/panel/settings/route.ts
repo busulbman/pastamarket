@@ -1,20 +1,24 @@
 import { NextResponse } from "next/server";
-import { updateSettings } from "@/lib/db";
+import { getWrites } from "@/lib/data";
 import { badRequest, guardWrite, readJson } from "@/lib/panel-api";
 import { pickSettings } from "@/lib/panel-schemas";
 
 // better-sqlite3 native bir modüldür; Edge runtime desteklemez.
 export const runtime = "nodejs";
+// SQLite yalnızca yazma izni olduğunda dinamik olarak yüklenir.
+// DATA_PROVIDER=json iken guardWrite() 403 döndürür ve bu import hiç çalışmaz.
 
 export async function PATCH(request: Request) {
   const denied = await guardWrite();
   if (denied) return denied;
+
+  const writes = await getWrites();
 
   // Yalnızca bilinen ayar anahtarları yazılır; gövdeye eklenen
   // rastgele anahtarlar (ör. catalog_version) yok sayılır.
   const values = pickSettings(await readJson(request));
   if (!Object.keys(values).length) return badRequest("Güncellenecek ayar bulunamadı.");
 
-  updateSettings(values);
+  writes.updateSettings(values);
   return NextResponse.json({ ok: true });
 }

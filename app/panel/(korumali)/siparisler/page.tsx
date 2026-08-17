@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { Suspense } from "react";
 import type { Metadata } from "next";
-import { allOrderItems, orders } from "@/lib/db";
+import { allOrderItems, orders } from "@/lib/data";
 import { money, whatsappLink } from "@/lib/format";
 import { DELIVERY_LABELS, PAYMENT_LABELS } from "@/lib/constants";
 import { EmptyState, PageHeader } from "@/components/panel/ui";
@@ -25,7 +25,7 @@ export default async function PanelOrders({
   searchParams: Promise<Search>;
 }) {
   const params = await searchParams;
-  const list = orders({
+  const list = await orders({
     q: params.q,
     status: params.durum,
     from: params.baslangic,
@@ -33,7 +33,7 @@ export default async function PanelOrders({
   });
 
   // Tüm kalemler tek sorguda alınıp bellekte eşleştirilir (N+1 sorgu yok).
-  const items = allOrderItems();
+  const items = await allOrderItems();
 
   return (
     <>

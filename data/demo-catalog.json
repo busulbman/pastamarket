@@ -1,0 +1,1290 @@
+{
+  "meta": {
+    "exportedAt": "2026-08-17T06:33:48.412Z",
+    "source": "data/pastamarket.db",
+    "counts": {
+      "categories": 9,
+      "products": 44,
+      "variants": 18,
+      "settings": 29
+    }
+  },
+  "settings": {
+    "address": "",
+    "announcement": "Belirli İstanbul ilçelerine aynı gün teslimat! Saat 14.00’a kadar verilen siparişler gün içinde kapınızda.",
+    "banner_image": "",
+    "banner_link": "/urunler",
+    "banner_text": "Profesyonel pastacılık ürünlerinden hobi malzemelerine kadar aradığınız her şey PastaMarket’te!",
+    "banner_title": "Pastacılığa Dair Her Şey",
+    "brand_name": "PastaMarket",
+    "courier_districts": "Arnavutköy,Bağcılar,Başakşehir,Bayrampaşa,Beşiktaş,Beyoğlu,Esenler,Eyüpsultan,Fatih,Gaziosmanpaşa,Sultangazi,Zeytinburnu",
+    "courier_fee": "120",
+    "free_courier_limit": "2500",
+    "free_shipping_limit": "3500",
+    "hero_image": "",
+    "hero_link": "/urunler",
+    "hero_text": "Saat 14.00’a kadar verdiğiniz siparişler, belirlenen ilçelerde aynı gün kapınızda.",
+    "hero_title": "Pasta Malzemelerinde Aynı Gün Teslimat!",
+    "hours": "",
+    "iban": "",
+    "iban_bank": "",
+    "iban_receiver": "",
+    "instagram": "",
+    "page_about": "",
+    "page_delivery": "",
+    "page_distance_sales": "",
+    "page_privacy": "",
+    "phone": "+90 544 586 89 33",
+    "same_day_cutoff": "14:00",
+    "shipping_fee": "149",
+    "tagline": "Pastacılığın tüm ihtiyaçları tek adreste",
+    "whatsapp": "905445868933"
+  },
+  "categories": [
+    {
+      "id": 1,
+      "name": "Çikolata",
+      "slug": "cikolata",
+      "image": "",
+      "active": 1,
+      "sort_order": 0
+    },
+    {
+      "id": 2,
+      "name": "Krema ve Dolgu",
+      "slug": "krema-ve-dolgu",
+      "image": "",
+      "active": 1,
+      "sort_order": 1
+    },
+    {
+      "id": 3,
+      "name": "Şeker Hamuru",
+      "slug": "seker-hamuru",
+      "image": "",
+      "active": 1,
+      "sort_order": 2
+    },
+    {
+      "id": 4,
+      "name": "Kalıp ve Ekipman",
+      "slug": "kalip-ve-ekipman",
+      "image": "",
+      "active": 1,
+      "sort_order": 3
+    },
+    {
+      "id": 5,
+      "name": "Süsleme Ürünleri",
+      "slug": "susleme-urunleri",
+      "image": "",
+      "active": 1,
+      "sort_order": 4
+    },
+    {
+      "id": 6,
+      "name": "Ambalaj Ürünleri",
+      "slug": "ambalaj-urunleri",
+      "image": "",
+      "active": 1,
+      "sort_order": 5
+    },
+    {
+      "id": 7,
+      "name": "Gıda Boyaları",
+      "slug": "gida-boyalari",
+      "image": "",
+      "active": 1,
+      "sort_order": 6
+    },
+    {
+      "id": 8,
+      "name": "Sıvı Şanti",
+      "slug": "sivi-santi",
+      "image": "",
+      "active": 1,
+      "sort_order": 7
+    },
+    {
+      "id": 9,
+      "name": "Toz Şanti ve Toz Krema",
+      "slug": "toz-santi-ve-toz-krema",
+      "image": "",
+      "active": 1,
+      "sort_order": 8
+    }
+  ],
+  "products": [
+    {
+      "id": 29,
+      "slug": "jel-gida-boyasi-kirmizi-30-g",
+      "name": "Jel Gıda Boyası Kırmızı 30 g",
+      "description": "Yoğun pigmentli jel gıda boyası. Az miktarda kullanımda dahi yüksek renk verir; kıvamı bozmaz.",
+      "brand": "PastaMarket Profesyonel",
+      "categoryId": 7,
+      "categoryName": "Gıda Boyaları",
+      "categorySlug": "gida-boyalari",
+      "mainImage": "/images/products/jel-gida-boyasi-kirmizi-30-g.jpg",
+      "images": [
+        "/images/products/jel-gida-boyasi-kirmizi-30-g.jpg"
+      ],
+      "price": 24.9,
+      "salePrice": null,
+      "unit": "şişe",
+      "weight": "30 g",
+      "productType": "Jel boya",
+      "active": true,
+      "isBestSeller": true,
+      "isNew": false,
+      "createdAt": "2026-08-16 11:17:25",
+      "variants": [
+        {
+          "id": 16,
+          "name": "Renk",
+          "optionLabel": "Kırmızı",
+          "price": 24.9
+        },
+        {
+          "id": 17,
+          "name": "Renk",
+          "optionLabel": "Siyah",
+          "price": 24.9
+        },
+        {
+          "id": 18,
+          "name": "Renk",
+          "optionLabel": "Kraliyet Mavisi",
+          "price": 26.9
+        }
+      ]
+    },
+    {
+      "id": 25,
+      "slug": "pasta-kutusu-30x30",
+      "name": "Pasta Kutusu 30×30 cm",
+      "description": "Pencereli, gıdaya uygun mukavva pasta kutusu. Taşımaya dayanıklı yapıdadır.",
+      "brand": "PastaMarket Hobi",
+      "categoryId": 6,
+      "categoryName": "Ambalaj Ürünleri",
+      "categorySlug": "ambalaj-urunleri",
+      "mainImage": "/images/products/pasta-kutusu-30x30.jpg",
+      "images": [
+        "/images/products/pasta-kutusu-30x30.jpg"
+      ],
+      "price": 34.9,
+      "salePrice": null,
+      "unit": "adet",
+      "weight": "30×30 cm",
+      "productType": "Kutu",
+      "active": true,
+      "isBestSeller": true,
+      "isNew": false,
+      "createdAt": "2026-08-16 11:17:25",
+      "variants": [
+        {
+          "id": 13,
+          "name": "Ebat",
+          "optionLabel": "25×25 cm",
+          "price": 28.9
+        },
+        {
+          "id": 14,
+          "name": "Ebat",
+          "optionLabel": "30×30 cm",
+          "price": 34.9
+        },
+        {
+          "id": 15,
+          "name": "Ebat",
+          "optionLabel": "40×40 cm",
+          "price": 49.9
+        }
+      ]
+    },
+    {
+      "id": 20,
+      "slug": "renkli-pasta-susu-100-g",
+      "name": "Renkli Pasta Süsü 100 g",
+      "description": "Karışık renkli şeker süsleme. Pasta, kurabiye ve dondurma üzerine serpilerek kullanılır.",
+      "brand": "PastaMarket Hobi",
+      "categoryId": 5,
+      "categoryName": "Süsleme Ürünleri",
+      "categorySlug": "susleme-urunleri",
+      "mainImage": "/images/products/renkli-pasta-susu-100-g.jpg",
+      "images": [
+        "/images/products/renkli-pasta-susu-100-g.jpg"
+      ],
+      "price": 19.9,
+      "salePrice": null,
+      "unit": "kutu",
+      "weight": "100 g",
+      "productType": "Şeker süsleme",
+      "active": true,
+      "isBestSeller": true,
+      "isNew": false,
+      "createdAt": "2026-08-16 11:17:25",
+      "variants": []
+    },
+    {
+      "id": 15,
+      "slug": "duy-seti-12-li",
+      "name": "Duy Seti 12’li",
+      "description": "Paslanmaz çelik sıkma duyu seti. Yıldız, düz ve yaprak uçları içerir; bulaşık makinesinde yıkanabilir.",
+      "brand": "PastaMarket Profesyonel",
+      "categoryId": 4,
+      "categoryName": "Kalıp ve Ekipman",
+      "categorySlug": "kalip-ve-ekipman",
+      "mainImage": "/images/products/duy-seti-12-li.jpg",
+      "images": [
+        "/images/products/duy-seti-12-li.jpg"
+      ],
+      "price": 129.9,
+      "salePrice": null,
+      "unit": "set",
+      "weight": "1 set",
+      "productType": "Sıkma duyu",
+      "active": true,
+      "isBestSeller": true,
+      "isNew": false,
+      "createdAt": "2026-08-16 11:17:25",
+      "variants": []
+    },
+    {
+      "id": 11,
+      "slug": "beyaz-seker-hamuru-1-kg",
+      "name": "Beyaz Şeker Hamuru 1 kg",
+      "description": "Esnek yapıda, çatlamaya dirençli beyaz şeker hamuru. Pasta kaplama ve figür çalışmalarına uygundur.",
+      "brand": "PastaMarket Profesyonel",
+      "categoryId": 3,
+      "categoryName": "Şeker Hamuru",
+      "categorySlug": "seker-hamuru",
+      "mainImage": "/images/products/beyaz-seker-hamuru-1-kg.jpg",
+      "images": [
+        "/images/products/beyaz-seker-hamuru-1-kg.jpg"
+      ],
+      "price": 89.9,
+      "salePrice": null,
+      "unit": "paket",
+      "weight": "1 kg",
+      "productType": "Şeker hamuru",
+      "active": true,
+      "isBestSeller": true,
+      "isNew": false,
+      "createdAt": "2026-08-16 11:17:25",
+      "variants": [
+        {
+          "id": 7,
+          "name": "Gramaj",
+          "optionLabel": "500 g",
+          "price": 54.9
+        },
+        {
+          "id": 8,
+          "name": "Gramaj",
+          "optionLabel": "1 kg",
+          "price": 89.9
+        },
+        {
+          "id": 9,
+          "name": "Gramaj",
+          "optionLabel": "2,5 kg",
+          "price": 199.9
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "slug": "krem-santi-tozu-1-kg",
+      "name": "Krem Şanti Tozu 1 kg",
+      "description": "Soğuk sütle çırpılarak hazırlanan krem şanti tozu. Yüksek hacim verir, sıkma işlemlerinde formunu korur.",
+      "brand": "PastaMarket Profesyonel",
+      "categoryId": 2,
+      "categoryName": "Krema ve Dolgu",
+      "categorySlug": "krema-ve-dolgu",
+      "mainImage": "/images/products/krem-santi-tozu-1-kg.jpg",
+      "images": [
+        "/images/products/krem-santi-tozu-1-kg.jpg"
+      ],
+      "price": 189.9,
+      "salePrice": null,
+      "unit": "paket",
+      "weight": "1 kg",
+      "productType": "Toz krema",
+      "active": true,
+      "isBestSeller": true,
+      "isNew": false,
+      "createdAt": "2026-08-16 11:17:25",
+      "variants": [
+        {
+          "id": 5,
+          "name": "Gramaj",
+          "optionLabel": "150 g",
+          "price": 27.5
+        },
+        {
+          "id": 6,
+          "name": "Gramaj",
+          "optionLabel": "1 kg",
+          "price": 189.9
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "slug": "bitter-kuvertur-cikolata-1-kg",
+      "name": "Bitter Kuvertür Çikolata 1 kg",
+      "description": "Yoğun kakao aromalı bitter kuvertür. Ganaj, mus ve kaplama uygulamalarına uygundur.",
+      "brand": "PastaMarket Profesyonel",
+      "categoryId": 1,
+      "categoryName": "Çikolata",
+      "categorySlug": "cikolata",
+      "mainImage": "/images/products/bitter-kuvertur-cikolata-1-kg.jpg",
+      "images": [
+        "/images/products/bitter-kuvertur-cikolata-1-kg.jpg"
+      ],
+      "price": 679.9,
+      "salePrice": null,
+      "unit": "paket",
+      "weight": "1 kg",
+      "productType": "Kuvertür",
+      "active": true,
+      "isBestSeller": true,
+      "isNew": false,
+      "createdAt": "2026-08-16 11:17:25",
+      "variants": [
+        {
+          "id": 3,
+          "name": "Gramaj",
+          "optionLabel": "1 kg",
+          "price": 679.9
+        },
+        {
+          "id": 4,
+          "name": "Gramaj",
+          "optionLabel": "2,5 kg",
+          "price": 1629.9
+        }
+      ]
+    },
+    {
+      "id": 1,
+      "slug": "sutlu-kuvertur-cikolata-1-kg",
+      "name": "Sütlü Kuvertür Çikolata 1 kg",
+      "description": "Yüksek kakao yağı oranı sayesinde kolay temperlenen sütlü kuvertür. Drip kaplama, ganaj ve çikolata süslemelerinde kullanılır. Serin ve kuru ortamda saklayınız.",
+      "brand": "PastaMarket Profesyonel",
+      "categoryId": 1,
+      "categoryName": "Çikolata",
+      "categorySlug": "cikolata",
+      "mainImage": "/images/products/sutlu-kuvertur-cikolata-1-kg.jpg",
+      "images": [
+        "/images/products/sutlu-kuvertur-cikolata-1-kg.jpg"
+      ],
+      "price": 649.9,
+      "salePrice": null,
+      "unit": "paket",
+      "weight": "1 kg",
+      "productType": "Kuvertür",
+      "active": true,
+      "isBestSeller": true,
+      "isNew": false,
+      "createdAt": "2026-08-16 11:17:25",
+      "variants": [
+        {
+          "id": 1,
+          "name": "Gramaj",
+          "optionLabel": "1 kg",
+          "price": 649.9
+        },
+        {
+          "id": 2,
+          "name": "Gramaj",
+          "optionLabel": "2,5 kg",
+          "price": 1549.9
+        }
+      ]
+    },
+    {
+      "id": 44,
+      "slug": "meister-toz-krema",
+      "name": "Meister Toz Krema",
+      "description": "",
+      "brand": "",
+      "categoryId": 9,
+      "categoryName": "Toz Şanti ve Toz Krema",
+      "categorySlug": "toz-santi-ve-toz-krema",
+      "mainImage": "/images/products/meister-toz-krema.jpg",
+      "images": [
+        "/images/products/meister-toz-krema.jpg"
+      ],
+      "price": 245,
+      "salePrice": null,
+      "unit": "adet",
+      "weight": "",
+      "productType": "",
+      "active": true,
+      "isBestSeller": false,
+      "isNew": false,
+      "createdAt": "2026-08-16 17:13:56",
+      "variants": []
+    },
+    {
+      "id": 43,
+      "slug": "fiero-toz-krema",
+      "name": "Fiero Toz Krema",
+      "description": "",
+      "brand": "",
+      "categoryId": 9,
+      "categoryName": "Toz Şanti ve Toz Krema",
+      "categorySlug": "toz-santi-ve-toz-krema",
+      "mainImage": "/images/products/fiero-toz-krema.jpg",
+      "images": [
+        "/images/products/fiero-toz-krema.jpg"
+      ],
+      "price": 250,
+      "salePrice": null,
+      "unit": "adet",
+      "weight": "",
+      "productType": "",
+      "active": true,
+      "isBestSeller": false,
+      "isNew": false,
+      "createdAt": "2026-08-16 17:13:56",
+      "variants": []
+    },
+    {
+      "id": 42,
+      "slug": "ovalette-toz-krema",
+      "name": "Ovalette Toz Krema",
+      "description": "",
+      "brand": "",
+      "categoryId": 9,
+      "categoryName": "Toz Şanti ve Toz Krema",
+      "categorySlug": "toz-santi-ve-toz-krema",
+      "mainImage": "/images/products/ovalette-toz-krema.jpg",
+      "images": [
+        "/images/products/ovalette-toz-krema.jpg"
+      ],
+      "price": 250,
+      "salePrice": null,
+      "unit": "adet",
+      "weight": "",
+      "productType": "",
+      "active": true,
+      "isBestSeller": false,
+      "isNew": false,
+      "createdAt": "2026-08-16 17:13:56",
+      "variants": []
+    },
+    {
+      "id": 41,
+      "slug": "tatki-toz-krem-santi",
+      "name": "Tatki Toz Krem Şanti",
+      "description": "",
+      "brand": "",
+      "categoryId": 9,
+      "categoryName": "Toz Şanti ve Toz Krema",
+      "categorySlug": "toz-santi-ve-toz-krema",
+      "mainImage": "/images/products/tatki-toz-krem-santi.jpg",
+      "images": [
+        "/images/products/tatki-toz-krem-santi.jpg"
+      ],
+      "price": 260,
+      "salePrice": null,
+      "unit": "adet",
+      "weight": "",
+      "productType": "",
+      "active": true,
+      "isBestSeller": false,
+      "isNew": false,
+      "createdAt": "2026-08-16 17:13:56",
+      "variants": []
+    },
+    {
+      "id": 40,
+      "slug": "ovalette-toz-santi",
+      "name": "Ovalette Toz Şanti",
+      "description": "",
+      "brand": "",
+      "categoryId": 9,
+      "categoryName": "Toz Şanti ve Toz Krema",
+      "categorySlug": "toz-santi-ve-toz-krema",
+      "mainImage": "/images/products/ovalette-toz-santi.jpg",
+      "images": [
+        "/images/products/ovalette-toz-santi.jpg"
+      ],
+      "price": 300,
+      "salePrice": null,
+      "unit": "adet",
+      "weight": "",
+      "productType": "",
+      "active": true,
+      "isBestSeller": false,
+      "isNew": false,
+      "createdAt": "2026-08-16 17:13:56",
+      "variants": []
+    },
+    {
+      "id": 39,
+      "slug": "meister-toz-krem-santi",
+      "name": "Meister Toz Krem Şanti",
+      "description": "",
+      "brand": "",
+      "categoryId": 9,
+      "categoryName": "Toz Şanti ve Toz Krema",
+      "categorySlug": "toz-santi-ve-toz-krema",
+      "mainImage": "/images/products/meister-toz-krem-santi.jpg",
+      "images": [
+        "/images/products/meister-toz-krem-santi.jpg"
+      ],
+      "price": 250,
+      "salePrice": null,
+      "unit": "adet",
+      "weight": "",
+      "productType": "",
+      "active": true,
+      "isBestSeller": false,
+      "isNew": false,
+      "createdAt": "2026-08-16 17:13:56",
+      "variants": []
+    },
+    {
+      "id": 38,
+      "slug": "dondo-toz-krem-santi",
+      "name": "Dondo Toz Krem Şanti",
+      "description": "",
+      "brand": "",
+      "categoryId": 9,
+      "categoryName": "Toz Şanti ve Toz Krema",
+      "categorySlug": "toz-santi-ve-toz-krema",
+      "mainImage": "/images/products/dondo-toz-krem-santi.jpg",
+      "images": [
+        "/images/products/dondo-toz-krem-santi.jpg"
+      ],
+      "price": 280,
+      "salePrice": null,
+      "unit": "adet",
+      "weight": "",
+      "productType": "",
+      "active": true,
+      "isBestSeller": false,
+      "isNew": false,
+      "createdAt": "2026-08-16 17:13:56",
+      "variants": []
+    },
+    {
+      "id": 37,
+      "slug": "samara-sekersiz-santi",
+      "name": "Samara Şekersiz Şanti",
+      "description": "",
+      "brand": "",
+      "categoryId": 8,
+      "categoryName": "Sıvı Şanti",
+      "categorySlug": "sivi-santi",
+      "mainImage": "/images/products/samara-sekersiz-santi.jpg",
+      "images": [
+        "/images/products/samara-sekersiz-santi.jpg"
+      ],
+      "price": 160,
+      "salePrice": null,
+      "unit": "adet",
+      "weight": "",
+      "productType": "",
+      "active": true,
+      "isBestSeller": false,
+      "isNew": false,
+      "createdAt": "2026-08-16 17:13:56",
+      "variants": []
+    },
+    {
+      "id": 36,
+      "slug": "hopla-sekersiz-santi",
+      "name": "Hopla Şekersiz Şanti",
+      "description": "",
+      "brand": "",
+      "categoryId": 8,
+      "categoryName": "Sıvı Şanti",
+      "categorySlug": "sivi-santi",
+      "mainImage": "/images/products/hopla-sekersiz-santi.jpg",
+      "images": [
+        "/images/products/hopla-sekersiz-santi.jpg"
+      ],
+      "price": 210,
+      "salePrice": null,
+      "unit": "adet",
+      "weight": "",
+      "productType": "",
+      "active": true,
+      "isBestSeller": false,
+      "isNew": false,
+      "createdAt": "2026-08-16 17:13:56",
+      "variants": []
+    },
+    {
+      "id": 35,
+      "slug": "perfect-sivi-santi",
+      "name": "Perfect Sıvı Şanti",
+      "description": "",
+      "brand": "",
+      "categoryId": 8,
+      "categoryName": "Sıvı Şanti",
+      "categorySlug": "sivi-santi",
+      "mainImage": "/images/products/perfect-sivi-santi.jpg",
+      "images": [
+        "/images/products/perfect-sivi-santi.jpg"
+      ],
+      "price": 180,
+      "salePrice": null,
+      "unit": "adet",
+      "weight": "",
+      "productType": "",
+      "active": true,
+      "isBestSeller": false,
+      "isNew": false,
+      "createdAt": "2026-08-16 17:13:56",
+      "variants": []
+    },
+    {
+      "id": 34,
+      "slug": "samara-sivi-santi",
+      "name": "Samara Sıvı Şanti",
+      "description": "",
+      "brand": "",
+      "categoryId": 8,
+      "categoryName": "Sıvı Şanti",
+      "categorySlug": "sivi-santi",
+      "mainImage": "/images/products/samara-sivi-santi.jpg",
+      "images": [
+        "/images/products/samara-sivi-santi.jpg"
+      ],
+      "price": 160,
+      "salePrice": null,
+      "unit": "adet",
+      "weight": "",
+      "productType": "",
+      "active": true,
+      "isBestSeller": false,
+      "isNew": false,
+      "createdAt": "2026-08-16 17:13:56",
+      "variants": []
+    },
+    {
+      "id": 33,
+      "slug": "hopla-sivi-santi-sekerli",
+      "name": "Hopla Sıvı Şanti Şekerli",
+      "description": "",
+      "brand": "",
+      "categoryId": 8,
+      "categoryName": "Sıvı Şanti",
+      "categorySlug": "sivi-santi",
+      "mainImage": "/images/products/hopla-sivi-santi-sekerli.jpg",
+      "images": [
+        "/images/products/hopla-sivi-santi-sekerli.jpg"
+      ],
+      "price": 210,
+      "salePrice": null,
+      "unit": "adet",
+      "weight": "",
+      "productType": "",
+      "active": true,
+      "isBestSeller": false,
+      "isNew": false,
+      "createdAt": "2026-08-16 17:13:56",
+      "variants": []
+    },
+    {
+      "id": 32,
+      "slug": "sedefli-toz-boya-10-g",
+      "name": "Sedefli Toz Boya 10 g",
+      "description": "Şeker hamuru yüzeylerde sedef parlaklığı veren toz boya. Fırça ile kuru uygulanır.",
+      "brand": "PastaMarket Hobi",
+      "categoryId": 7,
+      "categoryName": "Gıda Boyaları",
+      "categorySlug": "gida-boyalari",
+      "mainImage": "/images/products/sedefli-toz-boya-10-g.jpg",
+      "images": [
+        "/images/products/sedefli-toz-boya-10-g.jpg"
+      ],
+      "price": 69.9,
+      "salePrice": null,
+      "unit": "kutu",
+      "weight": "10 g",
+      "productType": "Toz boya",
+      "active": true,
+      "isBestSeller": false,
+      "isNew": false,
+      "createdAt": "2026-08-16 11:17:25",
+      "variants": []
+    },
+    {
+      "id": 31,
+      "slug": "toz-gida-boyasi-seti-6-li",
+      "name": "Toz Gıda Boyası Seti 6’lı",
+      "description": "Makaron ve çikolata çalışmalarına uygun toz gıda boyası seti. Yağ bazlı uygulamalarda tercih edilir.",
+      "brand": "PastaMarket Profesyonel",
+      "categoryId": 7,
+      "categoryName": "Gıda Boyaları",
+      "categorySlug": "gida-boyalari",
+      "mainImage": "/images/products/toz-gida-boyasi-seti-6-li.jpg",
+      "images": [
+        "/images/products/toz-gida-boyasi-seti-6-li.jpg"
+      ],
+      "price": 189.9,
+      "salePrice": null,
+      "unit": "set",
+      "weight": "6 × 10 g",
+      "productType": "Toz boya",
+      "active": true,
+      "isBestSeller": false,
+      "isNew": true,
+      "createdAt": "2026-08-16 11:17:25",
+      "variants": []
+    },
+    {
+      "id": 30,
+      "slug": "jel-gida-boyasi-siyah-20-g",
+      "name": "Jel Gıda Boyası Siyah 20 g",
+      "description": "Koyu tonlar için yüksek pigmentli siyah jel boya. Şeker hamuru ve kremada kullanılır.",
+      "brand": "PastaMarket Profesyonel",
+      "categoryId": 7,
+      "categoryName": "Gıda Boyaları",
+      "categorySlug": "gida-boyalari",
+      "mainImage": "/images/products/jel-gida-boyasi-siyah-20-g.jpg",
+      "images": [
+        "/images/products/jel-gida-boyasi-siyah-20-g.jpg"
+      ],
+      "price": 24.9,
+      "salePrice": null,
+      "unit": "şişe",
+      "weight": "20 g",
+      "productType": "Jel boya",
+      "active": true,
+      "isBestSeller": false,
+      "isNew": false,
+      "createdAt": "2026-08-16 11:17:25",
+      "variants": []
+    },
+    {
+      "id": 28,
+      "slug": "cupcake-kagidi-100-lu",
+      "name": "Cupcake Kağıdı 100’lü",
+      "description": "Fırına dayanıklı kağıt cupcake kapsülü. Standart muffin kalıplarına uygundur.",
+      "brand": "PastaMarket Hobi",
+      "categoryId": 6,
+      "categoryName": "Ambalaj Ürünleri",
+      "categorySlug": "ambalaj-urunleri",
+      "mainImage": "/images/products/cupcake-kagidi-100-lu.jpg",
+      "images": [
+        "/images/products/cupcake-kagidi-100-lu.jpg"
+      ],
+      "price": 49.9,
+      "salePrice": null,
+      "unit": "paket",
+      "weight": "100 adet",
+      "productType": "Kapsül",
+      "active": true,
+      "isBestSeller": false,
+      "isNew": false,
+      "createdAt": "2026-08-16 11:17:25",
+      "variants": []
+    },
+    {
+      "id": 27,
+      "slug": "kurabiye-poseti-100-lu",
+      "name": "Kurabiye Poşeti 100’lü",
+      "description": "Gıdaya uygun şeffaf kurabiye poşeti. Bağcık ayrı satılır.",
+      "brand": "PastaMarket Hobi",
+      "categoryId": 6,
+      "categoryName": "Ambalaj Ürünleri",
+      "categorySlug": "ambalaj-urunleri",
+      "mainImage": "/images/products/kurabiye-poseti-100-lu.jpg",
+      "images": [
+        "/images/products/kurabiye-poseti-100-lu.jpg"
+      ],
+      "price": 79.9,
+      "salePrice": null,
+      "unit": "paket",
+      "weight": "100 adet",
+      "productType": "Poşet",
+      "active": true,
+      "isBestSeller": false,
+      "isNew": false,
+      "createdAt": "2026-08-16 11:17:25",
+      "variants": []
+    },
+    {
+      "id": 26,
+      "slug": "seffaf-asetat-10-metre",
+      "name": "Şeffaf Asetat 10 metre",
+      "description": "Pasta kenarı ve mus kalıplarında kullanılan şeffaf asetat rulo. Kolay kesilir.",
+      "brand": "PastaMarket Profesyonel",
+      "categoryId": 6,
+      "categoryName": "Ambalaj Ürünleri",
+      "categorySlug": "ambalaj-urunleri",
+      "mainImage": "/images/products/seffaf-asetat-10-metre.jpg",
+      "images": [
+        "/images/products/seffaf-asetat-10-metre.jpg"
+      ],
+      "price": 119.9,
+      "salePrice": null,
+      "unit": "rulo",
+      "weight": "10 m",
+      "productType": "Asetat",
+      "active": true,
+      "isBestSeller": false,
+      "isNew": false,
+      "createdAt": "2026-08-16 11:17:25",
+      "variants": []
+    },
+    {
+      "id": 24,
+      "slug": "pasta-mumu-set",
+      "name": "Pasta Mumu Seti",
+      "description": "Rakam ve düz mum içeren doğum günü mum seti.",
+      "brand": "PastaMarket Hobi",
+      "categoryId": 5,
+      "categoryName": "Süsleme Ürünleri",
+      "categorySlug": "susleme-urunleri",
+      "mainImage": "/images/products/pasta-mumu-set.jpg",
+      "images": [
+        "/images/products/pasta-mumu-set.jpg"
+      ],
+      "price": 29.9,
+      "salePrice": null,
+      "unit": "set",
+      "weight": "1 set",
+      "productType": "Mum",
+      "active": true,
+      "isBestSeller": false,
+      "isNew": false,
+      "createdAt": "2026-08-16 11:17:25",
+      "variants": []
+    },
+    {
+      "id": 23,
+      "slug": "cikolata-yaprak-transfer-folyo",
+      "name": "Çikolata Transfer Folyosu",
+      "description": "Erimiş çikolata üzerine desen aktarmaya yarayan gıdaya uygun transfer folyosu.",
+      "brand": "PastaMarket Profesyonel",
+      "categoryId": 5,
+      "categoryName": "Süsleme Ürünleri",
+      "categorySlug": "susleme-urunleri",
+      "mainImage": "/images/products/cikolata-yaprak-transfer-folyo.jpg",
+      "images": [
+        "/images/products/cikolata-yaprak-transfer-folyo.jpg"
+      ],
+      "price": 189.9,
+      "salePrice": null,
+      "unit": "paket",
+      "weight": "10 yaprak",
+      "productType": "Transfer folyo",
+      "active": true,
+      "isBestSeller": false,
+      "isNew": true,
+      "createdAt": "2026-08-16 11:17:25",
+      "variants": []
+    },
+    {
+      "id": 22,
+      "slug": "yenilebilir-inci-50-g",
+      "name": "Yenilebilir İnci Süsleme 50 g",
+      "description": "Parlak yüzeyli şeker inci. Pasta kenarı ve cupcake süslemelerinde kullanılır.",
+      "brand": "PastaMarket Hobi",
+      "categoryId": 5,
+      "categoryName": "Süsleme Ürünleri",
+      "categorySlug": "susleme-urunleri",
+      "mainImage": "/images/products/yenilebilir-inci-50-g.jpg",
+      "images": [
+        "/images/products/yenilebilir-inci-50-g.jpg"
+      ],
+      "price": 44.9,
+      "salePrice": null,
+      "unit": "kutu",
+      "weight": "50 g",
+      "productType": "Şeker süsleme",
+      "active": true,
+      "isBestSeller": false,
+      "isNew": false,
+      "createdAt": "2026-08-16 11:17:25",
+      "variants": []
+    },
+    {
+      "id": 21,
+      "slug": "sprey-gida-boyasi-altin",
+      "name": "Sprey Gıda Boyası Altın",
+      "description": "Şeker hamuru ve çikolata yüzeylerde metalik görünüm veren sprey gıda boyası.",
+      "brand": "PastaMarket Hobi",
+      "categoryId": 5,
+      "categoryName": "Süsleme Ürünleri",
+      "categorySlug": "susleme-urunleri",
+      "mainImage": "/images/products/sprey-gida-boyasi-altin.jpg",
+      "images": [
+        "/images/products/sprey-gida-boyasi-altin.jpg"
+      ],
+      "price": 159.9,
+      "salePrice": null,
+      "unit": "adet",
+      "weight": "100 ml",
+      "productType": "Sprey boya",
+      "active": true,
+      "isBestSeller": false,
+      "isNew": false,
+      "createdAt": "2026-08-16 11:17:25",
+      "variants": []
+    },
+    {
+      "id": 19,
+      "slug": "spatula-seti-3-lu",
+      "name": "Pasta Spatulası Seti 3’lü",
+      "description": "Düz ve açılı paslanmaz çelik spatula seti. Krema düzeltme ve kaplama işlerinde kullanılır.",
+      "brand": "PastaMarket Profesyonel",
+      "categoryId": 4,
+      "categoryName": "Kalıp ve Ekipman",
+      "categorySlug": "kalip-ve-ekipman",
+      "mainImage": "/images/products/spatula-seti-3-lu.jpg",
+      "images": [
+        "/images/products/spatula-seti-3-lu.jpg"
+      ],
+      "price": 219.9,
+      "salePrice": null,
+      "unit": "set",
+      "weight": "1 set",
+      "productType": "El aleti",
+      "active": true,
+      "isBestSeller": false,
+      "isNew": false,
+      "createdAt": "2026-08-16 11:17:25",
+      "variants": []
+    },
+    {
+      "id": 18,
+      "slug": "donen-pasta-tablasi",
+      "name": "Döner Pasta Tablası",
+      "description": "Rulmanlı döner tabla. Kaplama ve süsleme işlemlerinde pastanın rahat çevrilmesini sağlar.",
+      "brand": "PastaMarket Profesyonel",
+      "categoryId": 4,
+      "categoryName": "Kalıp ve Ekipman",
+      "categorySlug": "kalip-ve-ekipman",
+      "mainImage": "/images/products/donen-pasta-tablasi.jpg",
+      "images": [
+        "/images/products/donen-pasta-tablasi.jpg"
+      ],
+      "price": 449.9,
+      "salePrice": null,
+      "unit": "adet",
+      "weight": "28 cm",
+      "productType": "Ekipman",
+      "active": true,
+      "isBestSeller": false,
+      "isNew": true,
+      "createdAt": "2026-08-16 11:17:25",
+      "variants": []
+    },
+    {
+      "id": 17,
+      "slug": "pasta-altligi-30-cm",
+      "name": "Pasta Altlığı 30 cm",
+      "description": "Gıdaya uygun kaplamalı mukavva pasta altlığı. Taşıma sırasında pastanın formunu korur.",
+      "brand": "PastaMarket Hobi",
+      "categoryId": 4,
+      "categoryName": "Kalıp ve Ekipman",
+      "categorySlug": "kalip-ve-ekipman",
+      "mainImage": "/images/products/pasta-altligi-30-cm.jpg",
+      "images": [
+        "/images/products/pasta-altligi-30-cm.jpg"
+      ],
+      "price": 34.9,
+      "salePrice": null,
+      "unit": "adet",
+      "weight": "30 cm",
+      "productType": "Altlık",
+      "active": true,
+      "isBestSeller": false,
+      "isNew": false,
+      "createdAt": "2026-08-16 11:17:25",
+      "variants": [
+        {
+          "id": 10,
+          "name": "Çap",
+          "optionLabel": "25 cm",
+          "price": 27.9
+        },
+        {
+          "id": 11,
+          "name": "Çap",
+          "optionLabel": "30 cm",
+          "price": 34.9
+        },
+        {
+          "id": 12,
+          "name": "Çap",
+          "optionLabel": "35 cm",
+          "price": 42.9
+        }
+      ]
+    },
+    {
+      "id": 16,
+      "slug": "silikon-kek-kalibi",
+      "name": "Silikon Kek Kalıbı 24 cm",
+      "description": "Yapışmaz silikon kek kalıbı. −40 °C ile 230 °C arasında kullanılabilir.",
+      "brand": "PastaMarket Hobi",
+      "categoryId": 4,
+      "categoryName": "Kalıp ve Ekipman",
+      "categorySlug": "kalip-ve-ekipman",
+      "mainImage": "/images/products/silikon-kek-kalibi.jpg",
+      "images": [
+        "/images/products/silikon-kek-kalibi.jpg"
+      ],
+      "price": 179.9,
+      "salePrice": 149.9,
+      "unit": "adet",
+      "weight": "24 cm",
+      "productType": "Kalıp",
+      "active": true,
+      "isBestSeller": false,
+      "isNew": false,
+      "createdAt": "2026-08-16 11:17:25",
+      "variants": []
+    },
+    {
+      "id": 14,
+      "slug": "cmc-toz-100-g",
+      "name": "CMC Toz (Kıvam Artırıcı) 100 g",
+      "description": "Şeker hamurunu sertleştirmek ve yapıştırıcı hazırlamak için kullanılan CMC tozu.",
+      "brand": "PastaMarket Profesyonel",
+      "categoryId": 3,
+      "categoryName": "Şeker Hamuru",
+      "categorySlug": "seker-hamuru",
+      "mainImage": "/images/products/cmc-toz-100-g.jpg",
+      "images": [
+        "/images/products/cmc-toz-100-g.jpg"
+      ],
+      "price": 79.9,
+      "salePrice": null,
+      "unit": "paket",
+      "weight": "100 g",
+      "productType": "Yardımcı malzeme",
+      "active": true,
+      "isBestSeller": false,
+      "isNew": false,
+      "createdAt": "2026-08-16 11:17:25",
+      "variants": []
+    },
+    {
+      "id": 13,
+      "slug": "cicek-hamuru-500-g",
+      "name": "Çiçek Hamuru 500 g",
+      "description": "İnce açılabilen, hızlı kuruyan çiçek hamuru. Yaprak ve çiçek figürleri için kullanılır.",
+      "brand": "PastaMarket Profesyonel",
+      "categoryId": 3,
+      "categoryName": "Şeker Hamuru",
+      "categorySlug": "seker-hamuru",
+      "mainImage": "/images/products/cicek-hamuru-500-g.jpg",
+      "images": [
+        "/images/products/cicek-hamuru-500-g.jpg"
+      ],
+      "price": 129.9,
+      "salePrice": null,
+      "unit": "paket",
+      "weight": "500 g",
+      "productType": "Çiçek hamuru",
+      "active": true,
+      "isBestSeller": false,
+      "isNew": false,
+      "createdAt": "2026-08-16 11:17:25",
+      "variants": []
+    },
+    {
+      "id": 12,
+      "slug": "pembe-seker-hamuru-1-kg",
+      "name": "Pembe Şeker Hamuru 1 kg",
+      "description": "Kullanıma hazır renkli şeker hamuru. Açma ve kaplama işlemlerinde renk homojenliğini korur.",
+      "brand": "PastaMarket Profesyonel",
+      "categoryId": 3,
+      "categoryName": "Şeker Hamuru",
+      "categorySlug": "seker-hamuru",
+      "mainImage": "/images/products/pembe-seker-hamuru-1-kg.jpg",
+      "images": [
+        "/images/products/pembe-seker-hamuru-1-kg.jpg"
+      ],
+      "price": 99.9,
+      "salePrice": null,
+      "unit": "paket",
+      "weight": "1 kg",
+      "productType": "Şeker hamuru",
+      "active": true,
+      "isBestSeller": false,
+      "isNew": false,
+      "createdAt": "2026-08-16 11:17:25",
+      "variants": []
+    },
+    {
+      "id": 10,
+      "slug": "jelatin-yaprak-100-g",
+      "name": "Yaprak Jelatin 100 g",
+      "description": "Mus, cheesecake ve jöle uygulamaları için yaprak jelatin. Soğuk suda yumuşatılarak kullanılır.",
+      "brand": "PastaMarket Profesyonel",
+      "categoryId": 2,
+      "categoryName": "Krema ve Dolgu",
+      "categorySlug": "krema-ve-dolgu",
+      "mainImage": "/images/products/jelatin-yaprak-100-g.jpg",
+      "images": [
+        "/images/products/jelatin-yaprak-100-g.jpg"
+      ],
+      "price": 149.9,
+      "salePrice": null,
+      "unit": "paket",
+      "weight": "100 g",
+      "productType": "Kıvam verici",
+      "active": true,
+      "isBestSeller": false,
+      "isNew": false,
+      "createdAt": "2026-08-16 11:17:25",
+      "variants": []
+    },
+    {
+      "id": 9,
+      "slug": "meyve-dolgusu-visne-1-kg",
+      "name": "Vişne Dolgusu 1 kg",
+      "description": "Fırına dayanıklı vişne dolgusu. Turta, kurabiye ve pasta katlarında kullanılabilir.",
+      "brand": "PastaMarket Profesyonel",
+      "categoryId": 2,
+      "categoryName": "Krema ve Dolgu",
+      "categorySlug": "krema-ve-dolgu",
+      "mainImage": "/images/products/meyve-dolgusu-visne-1-kg.jpg",
+      "images": [
+        "/images/products/meyve-dolgusu-visne-1-kg.jpg"
+      ],
+      "price": 249.9,
+      "salePrice": null,
+      "unit": "kavanoz",
+      "weight": "1 kg",
+      "productType": "Meyve dolgusu",
+      "active": true,
+      "isBestSeller": false,
+      "isNew": true,
+      "createdAt": "2026-08-16 11:17:25",
+      "variants": []
+    },
+    {
+      "id": 8,
+      "slug": "findik-kremasi-1-kg",
+      "name": "Fındık Kreması 1 kg",
+      "description": "Sürülebilir kıvamda fındık kreması. Kat arası dolgu ve iç harç olarak kullanılır.",
+      "brand": "PastaMarket Profesyonel",
+      "categoryId": 2,
+      "categoryName": "Krema ve Dolgu",
+      "categorySlug": "krema-ve-dolgu",
+      "mainImage": "/images/products/findik-kremasi-1-kg.jpg",
+      "images": [
+        "/images/products/findik-kremasi-1-kg.jpg"
+      ],
+      "price": 329.9,
+      "salePrice": null,
+      "unit": "kavanoz",
+      "weight": "1 kg",
+      "productType": "Dolgu kreması",
+      "active": true,
+      "isBestSeller": false,
+      "isNew": false,
+      "createdAt": "2026-08-16 11:17:25",
+      "variants": []
+    },
+    {
+      "id": 7,
+      "slug": "pastaci-kremasi-1-kg",
+      "name": "Pastacı Kreması 1 kg",
+      "description": "Soğuk hazırlanan pastacı kreması tozu. Ekler, profiterol ve yaş pasta dolgularında kullanılır.",
+      "brand": "PastaMarket Profesyonel",
+      "categoryId": 2,
+      "categoryName": "Krema ve Dolgu",
+      "categorySlug": "krema-ve-dolgu",
+      "mainImage": "/images/products/pastaci-kremasi-1-kg.jpg",
+      "images": [
+        "/images/products/pastaci-kremasi-1-kg.jpg"
+      ],
+      "price": 209.9,
+      "salePrice": null,
+      "unit": "paket",
+      "weight": "1 kg",
+      "productType": "Toz krema",
+      "active": true,
+      "isBestSeller": false,
+      "isNew": false,
+      "createdAt": "2026-08-16 11:17:25",
+      "variants": []
+    },
+    {
+      "id": 5,
+      "slug": "kakao-tozu-500-g",
+      "name": "Alkalize Kakao Tozu 500 g",
+      "description": "Koyu renkli, yüksek çözünürlüklü alkalize kakao tozu. Kek, mus ve sıcak çikolata hazırlığında kullanılır.",
+      "brand": "PastaMarket Profesyonel",
+      "categoryId": 1,
+      "categoryName": "Çikolata",
+      "categorySlug": "cikolata",
+      "mainImage": "/images/products/kakao-tozu-500-g.jpg",
+      "images": [
+        "/images/products/kakao-tozu-500-g.jpg"
+      ],
+      "price": 219.9,
+      "salePrice": null,
+      "unit": "paket",
+      "weight": "500 g",
+      "productType": "Kakao tozu",
+      "active": true,
+      "isBestSeller": false,
+      "isNew": true,
+      "createdAt": "2026-08-16 11:17:25",
+      "variants": []
+    },
+    {
+      "id": 4,
+      "slug": "damla-cikolata-1-kg",
+      "name": "Fırınlanabilir Damla Çikolata 1 kg",
+      "description": "Fırında şeklini koruyan damla çikolata. Kurabiye, muffin ve kek içi kullanımına uygundur.",
+      "brand": "PastaMarket Profesyonel",
+      "categoryId": 1,
+      "categoryName": "Çikolata",
+      "categorySlug": "cikolata",
+      "mainImage": "/images/products/damla-cikolata-1-kg.jpg",
+      "images": [
+        "/images/products/damla-cikolata-1-kg.jpg"
+      ],
+      "price": 289.9,
+      "salePrice": 259.9,
+      "unit": "paket",
+      "weight": "1 kg",
+      "productType": "Damla çikolata",
+      "active": true,
+      "isBestSeller": false,
+      "isNew": false,
+      "createdAt": "2026-08-16 11:17:25",
+      "variants": []
+    },
+    {
+      "id": 3,
+      "slug": "beyaz-kuvertur-cikolata-500-g",
+      "name": "Beyaz Kuvertür Çikolata 500 g",
+      "description": "Renklendirmeye uygun beyaz kuvertür. Gıda boyası ile renklendirilerek drip ve süsleme çalışmalarında kullanılabilir.",
+      "brand": "PastaMarket Profesyonel",
+      "categoryId": 1,
+      "categoryName": "Çikolata",
+      "categorySlug": "cikolata",
+      "mainImage": "/images/products/beyaz-kuvertur-cikolata-500-g.jpg",
+      "images": [
+        "/images/products/beyaz-kuvertur-cikolata-500-g.jpg"
+      ],
+      "price": 379.9,
+      "salePrice": null,
+      "unit": "paket",
+      "weight": "500 g",
+      "productType": "Kuvertür",
+      "active": true,
+      "isBestSeller": false,
+      "isNew": false,
+      "createdAt": "2026-08-16 11:17:25",
+      "variants": []
+    }
+  ]
+}

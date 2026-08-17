@@ -163,7 +163,7 @@ panel sunucu tarafında çalışmaya devam eder.
 | `ADMIN_PASSWORD_HASH` | `npm run admin:create-password` çıktısı | evet |
 | `ADMIN_SESSION_SECRET` | 32 baytlık rastgele hex | evet |
 
-Bu dört değişken **hem build hem runtime** için tanımlı olmalıdır (Netlify'da
+Bu beş değişken **hem build hem runtime** için tanımlı olmalıdır (Netlify'da
 varsayılan davranış budur). `DEMO_READ_ONLY` build sırasında da okunur; böylece
 derleme adımı veritabanına yazmaya çalışmaz.
 
@@ -205,13 +205,65 @@ ekranlarının okunması.
 
 Yerel geliştirmede `DEMO_READ_ONLY` tanımsızdır; tüm yazma özellikleri aynen çalışır.
 
+
+## Veri sağlayıcıları
+
+Uygulama iki veri kaynağıyla çalışabilir; seçim `DATA_PROVIDER` ile yapılır.
+
+| Değer | Kullanım | Kaynak |
+| --- | --- | --- |
+| `sqlite` (varsayılan) | Yerel geliştirme | `data/pastamarket.db` (better-sqlite3) |
+| `json` | Netlify demo | `data/demo-catalog.json` (salt-okunur) |
+
+`DATA_PROVIDER=json` iken **better-sqlite3 hiç yüklenmez**: native binding
+açılmaz, SQLite bağlantısı kurulmaz. Bunun için iki önlem alınmıştır:
+
+1. Sağlayıcı seçimi `lib/data/index.ts` içinde **dinamik import** ile yapılır;
+   JSON modunda `lib/data/sqlite-provider.ts` hiç import edilmez.
+2. `lib/db.ts` sürücüyü statik `import` ile değil, çalışma zamanında
+   `eval("require")("better-sqlite3")` ile yükler. Webpack bu ifadeyi statik
+   olarak çözemediği için hiçbir chunk'a `require("better-sqlite3")` girmez.
+   (Statik import kullanıldığında webpack modülü her sayfa chunk'ına "external"
+   olarak ekliyor ve Next.js'in `unstable_preloadEntries` adımı onu sunucu
+   açılışında değerlendiriyordu — Netlify Lambda'sında fonksiyon bu yüzden
+   JS hatası üretmeden çöküyordu.)
+
+Ortak dosyaların hiçbirinde better-sqlite3 için top-level import yoktur.
+Panel yazma işlemleri de `@/lib/data` üzerinden geçer; route dosyalarında
+`@/lib/db` referansı bulunmaz.
+
+### Demo kataloğunu üretme
+
+```bash
+npm run demo:export
+```
+
+`data/pastamarket.db` içindeki **aktif** kategori, ürün, varyasyon, fiyat ve
+mağaza ayarlarını `data/demo-catalog.json` dosyasına yazar. Sayılar koda
+sabitlenmez; yazımdan sonra dosya geri okunup veritabanıyla karşılaştırılır,
+uyuşmazlıkta script hata verir. Katalog değiştiğinde yeniden çalıştırıp
+JSON dosyasını commit edin.
+
+### Sağlık kontrolü
+
+| Uç | Ne yapar |
+| --- | --- |
+| `/api/health` | Veri kaynağına hiç dokunmadan `{ ok, provider, writable, demoReadOnly }` döner |
+| `/api/health/data` | Aktif sağlayıcıdan kategori ve ürün sayısını okur; hata durumunda 503 |
+
+### Demo modunda kapalı olanlar
+
+`DATA_PROVIDER=json` + `DEMO_READ_ONLY=true` iken sipariş kaydı ve tüm panel
+yazma işlemleri 403 döner. Sepet tarayıcıda çalışmaya devam eder; müşteri
+siparişini WhatsApp üzerinden iletebilir.
+
 ## İleride Firebase / ImgBB geçişi
 
 Arayüzü yeniden yazmadan geçebilmek için üç katman ayrılmıştır:
 
 | Katman | Bugün | Geçişte değişecek dosya |
 | --- | --- | --- |
-| Veri | SQLite | `lib/db.ts` (fonksiyon imzaları korunur) |
+| Veri | SQLite / JSON | `lib/data/` altına yeni sağlayıcı eklenir |
 | Görsel | `public/uploads` | `lib/images/index.ts` + yeni `lib/images/imgbb.ts` |
 | Kimlik | ENV + bcrypt | `lib/auth/provider.ts` (yeni sağlayıcı eklenir) |
 

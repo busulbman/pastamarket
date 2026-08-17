@@ -1,4 +1,4 @@
-import Database from "better-sqlite3";
+import type DatabaseNamespace from "better-sqlite3";
 import fs from "node:fs";
 import path from "node:path";
 import { config } from "@/lib/config";
@@ -14,6 +14,33 @@ import { Product, Settings, Variant } from "@/lib/types";
  * Firestore'a geçilirken bu dosyanın yerine aynı imzalara sahip bir uygulama
  * konur; panel ve mağaza bileşenleri değişmez.
  */
+
+/**
+ * better-sqlite3 sürücüsü ÇALIŞMA ZAMANINDA yüklenir.
+ *
+ * Statik `import` kullanılırsa webpack modülü "external" olarak her sayfa
+ * chunk'ına ekler; Next.js'in unstable_preloadEntries adımı bu external'ı
+ * değerlendirdiği için native binding, DATA_PROVIDER=json olsa bile sunucu
+ * açılışında yüklenir. Netlify Lambda'sında bu yükleme JS hatası üretmeden
+ * fonksiyonu çökertiyordu.
+ *
+ * eval("require") ifadesini webpack statik olarak çözemez; bu yüzden hiçbir
+ * chunk'a require("better-sqlite3") girmez. Sürücü yalnızca gerçekten SQLite
+ * bağlantısı kurulduğunda (DATA_PROVIDER=sqlite) yüklenir.
+ */
+type DatabaseCtor = typeof DatabaseNamespace;
+type DatabaseInstance = DatabaseNamespace.Database;
+
+let DatabaseImpl: DatabaseCtor | null = null;
+
+function loadDriver(): DatabaseCtor {
+  if (!DatabaseImpl) {
+    // eslint-disable-next-line no-eval
+    const runtimeRequire = eval("require") as NodeRequire;
+    DatabaseImpl = runtimeRequire("better-sqlite3") as DatabaseCtor;
+  }
+  return DatabaseImpl;
+}
 
 /**
  * Veritabanı dosyasını bulur.
@@ -61,10 +88,10 @@ const openReadOnly = () => config.demoReadOnly || isBuildPhase();
 /** Açılışta şema/migration/seed çalıştırılabilir mi? */
 const canInitialize = () => !config.demoReadOnly && !isBuildPhase();
 
-type GlobalWithDb = typeof globalThis & { __pastaDb?: Database.Database };
+type GlobalWithDb = typeof globalThis & { __pastaDb?: DatabaseInstance };
 const globalRef = globalThis as GlobalWithDb;
 
-let connection: Database.Database | null = null;
+let connection: DatabaseInstance | null = null;
 
 /**
  * Tembel (lazy) bağlantı.
@@ -77,7 +104,7 @@ let connection: Database.Database | null = null;
  * Süreç başına tek bağlantı tutulur; globalThis üzerinden saklandığı için
  * dev sunucusunun sıcak yeniden yüklemelerinde de çoğalmaz.
  */
-export function getDb(): Database.Database {
+export function getDb(): DatabaseInstance {
   if (connection) return connection;
   if (globalRef.__pastaDb) {
     connection = globalRef.__pastaDb;
@@ -87,6 +114,7 @@ export function getDb(): Database.Database {
   const file = resolveDatabaseFile();
   const readonly = openReadOnly();
 
+  const Database = loadDriver();
   const instance = new Database(
     file,
     readonly ? { readonly: true, fileMustExist: true } : {},
@@ -120,7 +148,7 @@ export function getDb(): Database.Database {
  * Geriye dönük uyumluluk için `db` erişimi.
  * Özellik okunduğu anda bağlantı kurulur (import anında değil).
  */
-export const db = new Proxy({} as Database.Database, {
+export const db = new Proxy({} as DatabaseInstance, {
   get(_target, property, receiver) {
     const instance = getDb();
     const value = Reflect.get(instance, property, instance);
@@ -602,8 +630,8 @@ type ProductRow = {
  * Sık kullanılan sorgu, bağlantı başına bir kez hazırlanır.
  * Modül seviyesinde prepare edilmez; aksi hâlde import anında bağlantı açılırdı.
  */
-let variantsStatement: Database.Statement | null = null;
-let variantsStatementOwner: Database.Database | null = null;
+let variantsStatement: DatabaseNamespace.Statement | null = null;
+let variantsStatementOwner: DatabaseInstance | null = null;
 
 function variantsOf(productId: number) {
   const instance = getDb();

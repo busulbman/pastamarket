@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { ArrowRight, Clock, ShieldCheck, Truck } from "lucide-react";
-import { categories, products, settings } from "@/lib/db";
+import { categories, products, settings } from "@/lib/data";
 import { whatsappNumber } from "@/lib/format";
 import { ProductImage } from "@/components/product-image";
 import { hasImage } from "@/lib/product-images";
@@ -13,11 +13,11 @@ import { Advantages } from "@/components/advantages";
 // Katalog yönetim panelinden değiştiği için ana sayfa her istekte tazelenir.
 export const dynamic = "force-dynamic";
 
-export default function Home() {
-  const s = settings();
-  const nav = categories();
-  const bestSellers = products({ tag: "best", limit: 10 });
-  const newArrivals = products({ tag: "new", limit: 10 });
+export default async function Home() {
+  const s = await settings();
+  const nav = await categories();
+  const bestSellers = await products({ tag: "best", limit: 10 });
+  const newArrivals = await products({ tag: "new", limit: 10 });
 
   return (
     <StoreShell>

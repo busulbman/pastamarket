@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { settings } from "@/lib/db";
+import { settings } from "@/lib/data";
 import { StoreShell } from "@/components/store-shell";
 import { CheckoutForm } from "@/components/checkout-form";
 import { DemoNotice } from "@/components/demo-notice";
@@ -8,7 +8,7 @@ import { demoReadOnly } from "@/lib/config";
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Siparişi Tamamla | PastaMarket" };
 
-export default function Checkout() {
+export default async function Checkout() {
   return (
     <StoreShell>
       <main className="container py-8">
@@ -16,7 +16,7 @@ export default function Checkout() {
           Siparişi Tamamla
         </h1>
         {demoReadOnly && <DemoNotice className="mb-6" />}
-        <CheckoutForm settings={settings()} readOnly={demoReadOnly} />
+        <CheckoutForm settings={await settings()} readOnly={demoReadOnly} />
       </main>
     </StoreShell>
   );

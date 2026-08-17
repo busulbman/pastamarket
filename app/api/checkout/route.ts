@@ -22,7 +22,7 @@ export async function POST(request: Request) {
       );
     }
 
-    return NextResponse.json(createOrder(parsed.data));
+    return NextResponse.json(await createOrder(parsed.data));
   } catch (error) {
     return NextResponse.json(
       { error: error instanceof Error ? error.message : "Sipariş oluşturulamadı." },

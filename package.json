@@ -9,7 +9,8 @@
     "typecheck": "tsc --noEmit",
     "lint": "next lint",
     "admin:create-password": "node scripts/create-admin-password.mjs",
-    "db:prepare-demo": "node scripts/prepare-demo-db.mjs"
+    "db:prepare-demo": "node scripts/prepare-demo-db.mjs",
+    "demo:export": "node scripts/export-demo-catalog.mjs"
   },
   "keywords": [],
   "author": "",

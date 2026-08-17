@@ -1,7 +1,7 @@
 import Link from "next/link";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { categories, productById } from "@/lib/db";
+import { categories, productById } from "@/lib/data";
 import { PageHeader, secondaryButton } from "@/components/panel/ui";
 import { ProductForm } from "@/components/panel/product-form";
 import { demoReadOnly } from "@/lib/config";
@@ -16,7 +16,7 @@ export default async function EditProductPage({
 }) {
   const { id } = await params;
   // Pasif ürünler de panelde düzenlenebilmelidir.
-  const product = productById(Number(id), true);
+  const product = await productById(Number(id), true);
   if (!product) notFound();
 
   return (
@@ -36,7 +36,7 @@ export default async function EditProductPage({
           ) : undefined
         }
       />
-      <ProductForm product={product} categories={categories(false)} readOnly={demoReadOnly} />
+      <ProductForm product={product} categories={await categories(false)} readOnly={demoReadOnly} />
     </>
   );
 }

@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { Suspense } from "react";
-import { categories, countProducts, products } from "@/lib/db";
+import { categories, countProducts, products } from "@/lib/data";
 import { StoreShell } from "@/components/store-shell";
 import { ProductCard } from "@/components/product-card";
 import { SortSelect } from "@/components/sort-select";
@@ -39,10 +39,10 @@ export default async function ProductsPage({
     brand: params.brand,
   };
 
-  const total = countProducts(filters);
-  const list = products({ ...filters, limit: PAGE_SIZE, offset: (page - 1) * PAGE_SIZE });
+  const total = await countProducts(filters);
+  const list = await products({ ...filters, limit: PAGE_SIZE, offset: (page - 1) * PAGE_SIZE });
   const pageCount = Math.max(1, Math.ceil(total / PAGE_SIZE));
-  const nav = categories();
+  const nav = await categories();
 
   const pageHref = (next: number) => {
     const query = new URLSearchParams();

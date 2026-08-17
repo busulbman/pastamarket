@@ -2,7 +2,7 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { ChevronRight } from "lucide-react";
-import { productBySlug, products, settings } from "@/lib/db";
+import { productBySlug, products, settings } from "@/lib/data";
 import { StoreShell } from "@/components/store-shell";
 import { ProductCard } from "@/components/product-card";
 import { ProductDetail } from "@/components/product-detail";
@@ -15,7 +15,7 @@ export async function generateMetadata({
 }: {
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
-  const product = productBySlug((await params).slug);
+  const product = await productBySlug((await params).slug);
   if (!product) return { title: "Ürün bulunamadı | PastaMarket" };
   return {
     title: `${product.name} | PastaMarket`,
@@ -28,16 +28,16 @@ export default async function ProductPage({
 }: {
   params: Promise<{ slug: string }>;
 }) {
-  const product = productBySlug((await params).slug);
+  const product = await productBySlug((await params).slug);
   if (!product) notFound();
 
   // Önceki sürümde benzer ürünler kategoriden bağımsız 4 kayıt çekip
   // filtrelediği için çoğu üründe boş kalıyordu.
-  const similar = products({ category: product.categorySlug, limit: 6 })
+  const similar = (await products({ category: product.categorySlug, limit: 6 }))
     .filter((item) => item.id !== product.id)
     .slice(0, 5);
 
-  const s = settings();
+  const s = await settings();
 
   return (
     <StoreShell>

@@ -1,16 +1,16 @@
 import Link from "next/link";
 import type { Metadata } from "next";
 import { Plus } from "lucide-react";
-import { dashboardStats, recentOrders } from "@/lib/db";
+import { dashboardStats, recentOrders } from "@/lib/data";
 import { money } from "@/lib/format";
 import { PageHeader, StatCard, EmptyState, primaryButton } from "@/components/panel/ui";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Kontrol paneli | PastaMarket" };
 
-export default function PanelHome() {
-  const stats = dashboardStats();
-  const latest = recentOrders(8);
+export default async function PanelHome() {
+  const stats = await dashboardStats();
+  const latest = await recentOrders(8);
 
   return (
     <>

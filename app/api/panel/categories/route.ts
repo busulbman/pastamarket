@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { categoryProductCount, db } from "@/lib/db";
+import { categoryProductCount, getWrites } from "@/lib/data";
 import { badRequest, guardWrite, readJson } from "@/lib/panel-api";
 import {
   categorySchema,
@@ -10,22 +10,21 @@ import {
 
 // better-sqlite3 native bir modüldür; Edge runtime desteklemez.
 export const runtime = "nodejs";
+// SQLite yalnızca yazma izni olduğunda dinamik olarak yüklenir.
+// DATA_PROVIDER=json iken guardWrite() 403 döndürür ve bu import hiç çalışmaz.
 
 export async function POST(request: Request) {
   const denied = await guardWrite();
   if (denied) return denied;
+
+  const writes = await getWrites();
 
   const parsed = categorySchema.safeParse(await readJson(request));
   if (!parsed.success) return badRequest(firstIssue(parsed.error));
   const input = parsed.data;
 
   try {
-    const result = db
-      .prepare(
-        "INSERT INTO categories (name,slug,image,active,sort_order) VALUES (?,?,?,?,?)",
-      )
-      .run(input.name, input.slug, input.image, input.active ? 1 : 0, input.sortOrder);
-    return NextResponse.json({ id: Number(result.lastInsertRowid) });
+    return NextResponse.json({ id: writes.createCategory(input) });
   } catch {
     return badRequest("Kategori kaydedilemedi. Slug benzersiz olmalıdır.");
   }
@@ -35,24 +34,16 @@ export async function PATCH(request: Request) {
   const denied = await guardWrite();
   if (denied) return denied;
 
+  const writes = await getWrites();
+
   const parsed = categoryUpdateSchema.safeParse(await readJson(request));
   if (!parsed.success) return badRequest(firstIssue(parsed.error));
   const input = parsed.data;
 
   try {
-    const result = db
-      .prepare(
-        "UPDATE categories SET name=?,slug=?,image=?,active=?,sort_order=? WHERE id=?",
-      )
-      .run(
-        input.name,
-        input.slug,
-        input.image,
-        input.active ? 1 : 0,
-        input.sortOrder,
-        input.id,
-      );
-    if (!result.changes) return badRequest("Kategori bulunamadı.", 404);
+    if (!writes.updateCategory(input.id, input)) {
+      return badRequest("Kategori bulunamadı.", 404);
+    }
     return NextResponse.json({ ok: true });
   } catch {
     return badRequest("Kategori güncellenemedi. Slug benzersiz olmalıdır.");
@@ -63,10 +54,12 @@ export async function DELETE(request: Request) {
   const denied = await guardWrite();
   if (denied) return denied;
 
+  const writes = await getWrites();
+
   const parsed = idSchema.safeParse(await readJson(request));
   if (!parsed.success) return badRequest("Geçersiz kategori.");
 
-  const used = categoryProductCount(parsed.data.id);
+  const used = await categoryProductCount(parsed.data.id);
   if (used > 0) {
     return badRequest(
       `Bu kategoride ${used} ürün bulunuyor. Önce ürünleri başka kategoriye taşıyın.`,
@@ -74,8 +67,9 @@ export async function DELETE(request: Request) {
     );
   }
 
-  const result = db.prepare("DELETE FROM categories WHERE id=?").run(parsed.data.id);
-  if (!result.changes) return badRequest("Kategori bulunamadı.", 404);
+  if (!writes.deleteCategory(parsed.data.id)) {
+    return badRequest("Kategori bulunamadı.", 404);
+  }
 
   return NextResponse.json({ ok: true });
 }

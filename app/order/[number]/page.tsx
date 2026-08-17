@@ -2,7 +2,7 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { CheckCircle2 } from "lucide-react";
-import { db, settings } from "@/lib/db";
+import { orderByNumber, orderItems, settings } from "@/lib/data";
 import { money, whatsappLink } from "@/lib/format";
 import { StoreShell } from "@/components/store-shell";
 import { WhatsAppIcon } from "@/components/icons";
@@ -11,46 +11,17 @@ import { DELIVERY_LABELS, PAYMENT_LABELS } from "@/lib/constants";
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Siparişiniz | PastaMarket" };
 
-type OrderRow = {
-  id: number;
-  order_number: string;
-  first_name: string;
-  last_name: string;
-  phone: string;
-  city: string;
-  district: string;
-  address: string;
-  delivery_method: string;
-  payment_method: string;
-  subtotal: number;
-  delivery_fee: number;
-  total: number;
-  status: string;
-};
-
-type OrderItemRow = {
-  id: number;
-  product_name: string;
-  variant_label: string | null;
-  quantity: number;
-  line_total: number;
-};
-
 export default async function OrderPage({
   params,
 }: {
   params: Promise<{ number: string }>;
 }) {
   const { number } = await params;
-  const order = db
-    .prepare("SELECT * FROM orders WHERE order_number=?")
-    .get(number) as OrderRow | undefined;
+  const order = await orderByNumber(number);
   if (!order) notFound();
 
-  const items = db
-    .prepare("SELECT * FROM order_items WHERE order_id=?")
-    .all(order.id) as OrderItemRow[];
-  const s = settings();
+  const items = await orderItems(order.id);
+  const s = await settings();
 
   const summary = [
     `Sipariş No: ${order.order_number}`,

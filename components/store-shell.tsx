@@ -1,4 +1,4 @@
-import { categories, settings } from "@/lib/db";
+import { categories, settings } from "@/lib/data";
 import { whatsappLink } from "@/lib/format";
 import { WHATSAPP_DEFAULT_MESSAGE } from "@/lib/constants";
 import { Header } from "@/components/header";
@@ -9,9 +9,9 @@ import { WhatsAppIcon } from "@/components/icons";
  * Mağaza tarafındaki tüm sayfaların ortak çerçevesi.
  * Ayarlar ve kategoriler yalnızca burada okunur, alt bileşenlere prop olarak geçer.
  */
-export function StoreShell({ children }: { children: React.ReactNode }) {
-  const s = settings();
-  const nav = categories();
+export async function StoreShell({ children }: { children: React.ReactNode }) {
+  const s = await settings();
+  const nav = await categories();
   const whatsappHref = whatsappLink(s.whatsapp, WHATSAPP_DEFAULT_MESSAGE);
 
   return (

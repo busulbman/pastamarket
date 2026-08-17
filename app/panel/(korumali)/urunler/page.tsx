@@ -2,7 +2,7 @@ import Link from "next/link";
 import { Suspense } from "react";
 import type { Metadata } from "next";
 import { Plus } from "lucide-react";
-import { categories, countProducts, products } from "@/lib/db";
+import { categories, countProducts, products } from "@/lib/data";
 import { money } from "@/lib/format";
 import { ProductImage } from "@/components/product-image";
 import { ProductFilters } from "@/components/panel/product-filters";
@@ -24,7 +24,7 @@ export default async function PanelProducts({
 }) {
   const params = await searchParams;
   const page = Math.max(1, Number(params.sayfa) || 1);
-  const categoryList = categories(false);
+  const categoryList = await categories(false);
 
   const filters = {
     q: params.q,
@@ -34,8 +34,8 @@ export default async function PanelProducts({
   };
 
   // Pasif filtresi ayrı ele alınır: sorgu katmanı yalnızca "aktifleri gizle"yi bilir.
-  const total = countProducts(filters);
-  const all = products({ ...filters, limit: PAGE_SIZE, offset: (page - 1) * PAGE_SIZE });
+  const total = await countProducts(filters);
+  const all = await products({ ...filters, limit: PAGE_SIZE, offset: (page - 1) * PAGE_SIZE });
   const list = params.durum === "pasif" ? all.filter((item) => !item.active) : all;
   const pageCount = Math.max(1, Math.ceil(total / PAGE_SIZE));
 

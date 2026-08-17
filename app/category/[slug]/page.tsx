@@ -2,7 +2,7 @@ import Link from "next/link";
 import { Suspense } from "react";
 import { notFound } from "next/navigation";
 import { ChevronRight } from "lucide-react";
-import { categories, products } from "@/lib/db";
+import { categories, products } from "@/lib/data";
 import { ProductImage } from "@/components/product-image";
 import { hasImage } from "@/lib/product-images";
 import { StoreShell } from "@/components/store-shell";
@@ -20,10 +20,10 @@ export default async function CategoryPage({
 }) {
   const { slug } = await params;
   const { sort } = await searchParams;
-  const category = categories().find((item) => item.slug === slug);
+  const category = (await categories()).find((item) => item.slug === slug);
   if (!category) notFound();
 
-  const list = products({ category: slug, sort });
+  const list = await products({ category: slug, sort });
 
   return (
     <StoreShell>
