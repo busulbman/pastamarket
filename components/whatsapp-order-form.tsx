@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { Truck } from "lucide-react";
+import { Check, Copy, Truck } from "lucide-react";
 import { cartKey, useCart } from "@/components/cart";
 import { districtList, money, whatsappLink } from "@/lib/format";
 import { WhatsAppIcon } from "@/components/icons";
@@ -36,6 +36,44 @@ export function WhatsAppOrderForm({ settings: s }: { settings: Record<string, st
   const [note, setNote] = useState("");
   const [delivery, setDelivery] = useState<Delivery>("shipping");
   const [payment, setPayment] = useState("cash");
+  const [copyState, setCopyState] = useState<"idle" | "copied" | "failed">("idle");
+
+  /**
+   * IBAN panoya BOŞLUKSUZ kopyalanır; işlem tamamen istemci tarafındadır.
+   * navigator.clipboard güvenli olmayan bağlamda veya sayfa odakta değilken
+   * hata verebildiği için geçici textarea ile yedek yöntem kullanılır.
+   */
+  async function copyIban() {
+    const plain = (s.iban ?? "").replace(/\s+/g, "");
+    if (!plain) return;
+
+    let ok = false;
+    try {
+      await navigator.clipboard.writeText(plain);
+      ok = true;
+    } catch {
+      ok = false;
+    }
+
+    if (!ok) {
+      try {
+        const field = document.createElement("textarea");
+        field.value = plain;
+        field.setAttribute("readonly", "");
+        field.style.position = "fixed";
+        field.style.opacity = "0";
+        document.body.appendChild(field);
+        field.select();
+        ok = document.execCommand("copy");
+        document.body.removeChild(field);
+      } catch {
+        ok = false;
+      }
+    }
+
+    setCopyState(ok ? "copied" : "failed");
+    window.setTimeout(() => setCopyState("idle"), 2000);
+  }
 
   const courierDistricts = useMemo(
     () => districtList(s.courier_districts),
@@ -253,6 +291,59 @@ export function WhatsAppOrderForm({ settings: s }: { settings: Record<string, st
                 </label>
               ))}
           </div>
+
+          {/* Havale/EFT seçildiğinde alıcı ve IBAN gösterilir. Bilgiler
+              data/demo-catalog.json içindeki settings alanından gelir. */}
+          {payment === "bank_transfer" && s.iban?.trim() && (
+            <div className="mt-4 rounded-xl bg-brand-soft p-4">
+              {s.iban_receiver?.trim() && (
+                <p className="text-sm text-ink">
+                  <span className="text-muted">Alıcı:</span>{" "}
+                  <b>{s.iban_receiver}</b>
+                </p>
+              )}
+              {s.iban_bank?.trim() && (
+                <p className="mt-1 text-sm text-ink">
+                  <span className="text-muted">Banka:</span> <b>{s.iban_bank}</b>
+                </p>
+              )}
+
+              <p className="mt-3 text-xs font-semibold text-muted">IBAN</p>
+              <div className="mt-1 flex flex-wrap items-center gap-2">
+                <code className="min-w-0 flex-1 break-all rounded-lg bg-white px-3 py-2 font-mono text-[13px] font-semibold leading-6 tracking-wide text-ink">
+                  {s.iban}
+                </code>
+                <button
+                  type="button"
+                  onClick={copyIban}
+                  aria-label="IBAN numarasını kopyala"
+                  className="inline-flex shrink-0 items-center gap-1.5 rounded-lg border border-brand px-3 py-2 text-xs font-bold text-brand transition hover:bg-brand hover:text-white"
+                >
+                  {copyState === "copied" ? <Check size={14} /> : <Copy size={14} />}
+                  {copyState === "copied"
+                    ? "Kopyalandı"
+                    : copyState === "failed"
+                      ? "Kopyalanamadı"
+                      : "Kopyala"}
+                </button>
+              </div>
+
+              <p aria-live="polite" className="sr-only">
+                {copyState === "copied"
+                  ? "IBAN panoya kopyalandı"
+                  : copyState === "failed"
+                    ? "IBAN kopyalanamadı, elle seçebilirsiniz"
+                    : ""}
+              </p>
+
+              <p className="mt-2 text-xs leading-5 text-muted">
+                {copyState === "failed"
+                  ? "Kopyalanamadı — IBAN'ı elle seçip kopyalayabilirsiniz."
+                  : "Ödeme açıklamasına ad soyadınızı yazmanız yeterlidir."}
+              </p>
+            </div>
+          )}
+
           <p className="mt-3 text-xs text-muted">Online kredi kartı ödemesi alınmaz.</p>
         </section>
       </div>

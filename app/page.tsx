@@ -62,7 +62,8 @@ export default function Home() {
                   height={600}
                   sizes="(min-width: 768px) 560px, 100vw"
                   priority
-                  className="h-56 w-full object-cover sm:h-72 md:h-[380px]"
+                  // Görselin içeriği sağ tarafta; kırpma boş pembe alandan yapılır.
+                  className="h-56 w-full object-cover object-right sm:h-72 md:h-[380px]"
                 />
               ) : (
                 <div
