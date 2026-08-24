@@ -1,5 +1,5 @@
 import "server-only";
-import { readImgBBApiKey } from "@/lib/config";
+import { config, readImgBBApiKey } from "@/lib/config";
 
 const MAX_UPLOAD_BYTES = 10 * 1024 * 1024;
 const TYPES = new Set(["image/jpeg", "image/png", "image/webp"]);
@@ -8,6 +8,9 @@ const EXTENSIONS = new Set(["jpg", "jpeg", "png", "webp"]);
 export type UploadResult = { url: string } | { error: string; status: number };
 
 export async function uploadToImgBB(file: File): Promise<UploadResult> {
+  if (config.imageProvider !== "imgbb") {
+    return { error: "Görsel sağlayıcısı yapılandırılmadı. IMAGE_PROVIDER=imgbb olmalıdır.", status: 503 };
+  }
   if (!TYPES.has(file.type.toLowerCase()) || !EXTENSIONS.has(file.name.split(".").pop()?.toLowerCase() ?? "")) {
     return { error: "Yalnızca JPG, PNG veya WebP görselleri yükleyebilirsiniz.", status: 415 };
   }

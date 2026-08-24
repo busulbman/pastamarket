@@ -1,87 +1,57 @@
-# PastaMarket — statik müşteri demosu
+# PastaMarket
 
-Next.js 15 (App Router), React 19 ve Tailwind CSS v4 ile hazırlanmış pastacılık
-malzemeleri mağazası. Bu branch (`main`) **tamamen statik** bir vitrindir:
-sunucu, veritabanı, API route ve native modül yoktur.
+Next.js App Router ile hazırlanmış PastaMarket vitrini ve yönetim paneli.
+Canlı mağaza Firebase Firestore’dan, ürün görselleri ImgBB’den okunacak şekilde
+tasarlanmıştır. Firebase Admin SDK yalnızca Node.js sunucu kodunda kullanılır;
+Firebase Authentication kullanılmaz.
 
-Panel, SQLite, sipariş veritabanı ve kimlik doğrulama içeren tam sürüm
-**`fullstack-backup`** branch'inde durmaktadır. Firebase/ImgBB bağlandığında
-oradan geri alınacaktır.
+## Ortam değişkenleri
 
-## Çalıştırma
+`.env.example` dosyasını `.env.local` olarak kopyalayın. Gerçek değerleri asla
+repoya eklemeyin.
+
+| Değişken | Amaç |
+| --- | --- |
+| `DATA_PROVIDER` | Yerel/demo için `json`, canlı ortam için `firestore` |
+| `IMAGE_PROVIDER` | Canlı ortam için `imgbb` |
+| `ADMIN_USERNAME` | Panel kullanıcı adı |
+| `ADMIN_PASSWORD_HASH` | bcrypt parola hash’i |
+| `ADMIN_SESSION_SECRET` | En az 32 karakterlik oturum imzalama anahtarı |
+| `FIREBASE_PROJECT_ID`, `FIREBASE_CLIENT_EMAIL`, `FIREBASE_PRIVATE_KEY` | Sunucu tarafı Firebase Admin yapılandırması |
+| `IMGBB_API_KEY` | Yalnızca korumalı upload route’unun kullandığı anahtar |
+
+Parola hash’i üretmek için:
 
 ```bash
-npm install
-npm run dev        # http://localhost:3000
-npm run typecheck  # tsc --noEmit
-npm run build      # statik çıktı -> out/
+npm run admin:create-password -- 'uzun-ve-benzersiz-parolaniz'
 ```
 
-Build sonrası çıktıyı yerelde denemek için:
+## Geliştirme ve kontroller
 
 ```bash
-npx serve out
+DATA_PROVIDER=json IMAGE_PROVIDER=local npm run dev
+DATA_PROVIDER=json IMAGE_PROVIDER=local npm run typecheck
+DATA_PROVIDER=json IMAGE_PROVIDER=local npm run build
 ```
 
-## Mimari
+JSON modu `data/demo-catalog.json` içindeki 9 kategori, 44 ürün, 18 varyasyon
+ve mağaza ayarını salt-okunur demo olarak kullanır. Firestore modunda panel,
+checkout ve ürün yönetimi yazılabilirdir.
 
-| Konu | Nasıl |
-| --- | --- |
-| Veri kaynağı | `data/demo-catalog.json` — **build sırasında** okunur ve sayfalara gömülür |
-| Çıktı | `output: "export"` → `out/` klasörü |
-| Ürün sayfaları | `generateStaticParams` ile 44 ürün için önceden üretilir |
-| Kategori sayfaları | `generateStaticParams` ile 9 kategori için önceden üretilir |
-| Arama / filtre / sıralama | Tarayıcıda, gömülü katalog üzerinde (`components/product-list.tsx`) |
-| Sepet | `localStorage` (`components/cart.tsx`) |
-| Sipariş | Veritabanına yazmaz; hazır WhatsApp mesajı üretir (`/siparis`) |
-| Görseller | `public/images/products/` — dosya yoksa `product-placeholder.svg` |
+## Firestore aktarımı
 
-Statik export'ta `next/image` optimizasyon sunucusu bulunmadığı için
-`images: { unoptimized: true }` kullanılır.
+Firebase ortam değişkenleri tanımlandıktan sonra:
 
-## Katalog güncelleme
-
-`data/demo-catalog.json` bu branch'te verinin tek kaynağıdır. Ürün/kategori
-değişikliği için ya dosyayı doğrudan düzenleyin ya da `fullstack-backup`
-branch'inde `npm run demo:export` çalıştırıp üretilen dosyayı buraya kopyalayın.
-
-Dosya biçimi:
-
-```json
-{
-  "meta":       { "exportedAt": "...", "counts": { … } },
-  "settings":   { "brand_name": "...", "whatsapp": "...", … },
-  "categories": [ { "id": 1, "name": "...", "slug": "...", … } ],
-  "products":   [ { "id": 1, "slug": "...", "price": 210, "variants": [ … ] } ]
-}
+```bash
+DATA_PROVIDER=firestore npm run firestore:migrate-demo
 ```
 
-## Netlify ayarları
+Aktarım, sabit belge kimlikleri ve `settings/migrations` işaretleyicisi kullanır;
+tekrar çalıştırıldığında yeni kopya kayıt oluşturmaz.
 
-| Ayar | Değer |
-| --- | --- |
-| Build command | `npm run build` |
-| Publish directory | `out` |
-| Node.js sürümü | 20 |
-| Functions | **yok** |
-| `@netlify/plugin-nextjs` | **yok** |
-| Environment variable | **gerekmiyor** |
+## Netlify
 
-`netlify.toml` yalnızca build komutu, publish klasörü, Node sürümü ve statik
-dosya cache başlıklarını içerir.
-
-## Site içeriği
-
-- 9 kategori, 44 ürün, 18 varyasyon
-- Ana sayfa: duyuru çubuğu, banner, kategori şeridi, çok satanlar, avantajlar,
-  yeni ürünler, alt banner
-- Ürün listesi, kategori sayfaları, ürün detayı, markalar
-- Sepet ve WhatsApp siparişi
-- İletişim ve kurumsal sayfalar (metinler `data/demo-catalog.json` içindeki
-  `settings` alanından gelir; boş olanlar gösterilmez)
-
-## Tema
-
-Tüm renkler `app/globals.css` içindeki `@theme` bloğunda tanımlıdır
-(`--color-brand`, `--color-ink`, `--color-line` …). Bileşenlerde `bg-brand`,
-`text-ink`, `border-line` sınıfları kullanılır; dosyalara hex kodu yazılmaz.
+Node sürümü 22’dir. `output: "export"` kullanılmaz: Netlify’nin güncel Next.js
+OpenNext desteği App Router, Route Handler, SSR ve cache revalidation’ı çalıştırır.
+Netlify ortamında `DATA_PROVIDER=firestore` ve `IMAGE_PROVIDER=imgbb` ile gerekli
+secret değerleri yalnızca platformun environment ayarlarına eklenmelidir.
