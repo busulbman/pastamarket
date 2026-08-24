@@ -1,6 +1,7 @@
 import { Suspense } from "react";
 import type { Metadata } from "next";
-import { getCategories, getProducts } from "@/lib/catalog";
+import { getCategories } from "@/lib/catalog";
+import { productPage } from "@/lib/data";
 import { StoreShell } from "@/components/store-shell";
 import { ProductList } from "@/components/product-list";
 import { ProductsHeading } from "@/components/products-heading";
@@ -8,12 +9,19 @@ import { ProductsHeading } from "@/components/products-heading";
 export const metadata: Metadata = { title: "Tüm Ürünler | PastaMarket" };
 
 /**
- * Tüm ürünler sayfası statik üretilir; katalog build sırasında gömülür.
- * Arama, marka ve etiket filtreleri tarayıcıda çalışır (bkz. ProductList).
+ * İlk sayfa 24 ürünle sınırlıdır; devamı cursor API'sinden yüklenir.
  */
-export default function ProductsPage() {
-  const products = getProducts();
-  const categories = getCategories();
+export const revalidate = 300;
+
+export default async function ProductsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ tag?: string; brand?: string }>;
+}) {
+  const search = await searchParams;
+  const tag = search.tag === "best" || search.tag === "new" ? search.tag : undefined;
+  const brand = search.brand || undefined;
+  const [page, categories] = await Promise.all([productPage({ limit: 24, tag, brand }), getCategories()]);
 
   return (
     <StoreShell>
@@ -23,7 +31,7 @@ export default function ProductsPage() {
         </Suspense>
 
         <Suspense fallback={<p className="mt-6 text-sm text-muted">Ürünler yükleniyor…</p>}>
-          <ProductList products={products} categories={categories} />
+          <ProductList products={page.products} categories={categories} nextCursor={page.nextCursor} />
         </Suspense>
       </main>
     </StoreShell>

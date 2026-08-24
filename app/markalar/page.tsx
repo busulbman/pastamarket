@@ -5,8 +5,9 @@ import { StoreShell } from "@/components/store-shell";
 
 export const metadata: Metadata = { title: "Markalar | PastaMarket" };
 
-export default function BrandsPage() {
-  const list = getBrands();
+export const revalidate = 300;
+export default async function BrandsPage() {
+  const list = await getBrands();
 
   return (
     <StoreShell>

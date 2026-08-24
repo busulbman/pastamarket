@@ -7,6 +7,7 @@ import { Product } from "@/lib/types";
 import { discountPercent, money } from "@/lib/format";
 import { useCart } from "@/components/cart";
 import { ProductImage } from "@/components/product-image";
+import { productCardImageUrl } from "@/lib/image-url";
 
 /** Kart görselleri küçük boyutta yüklenir; büyük görsel yalnızca ürün detayındadır. */
 const CARD_IMAGE_SIZE = 320;
@@ -50,7 +51,7 @@ export function ProductCard({ product }: { product: Product }) {
       >
         <span className="block aspect-square w-full p-3">
           <ProductImage
-            src={product.mainImage}
+            src={productCardImageUrl(product.imageUrl || product.mainImage)}
             alt=""
             width={CARD_IMAGE_SIZE}
             height={CARD_IMAGE_SIZE}

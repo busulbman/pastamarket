@@ -1,0 +1,9 @@
+"use client";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+
+export function LoginForm() {
+  const router = useRouter(); const [busy, setBusy] = useState(false); const [error, setError] = useState("");
+  async function submit(event: React.FormEvent<HTMLFormElement>) { event.preventDefault(); setBusy(true); setError(""); const form = new FormData(event.currentTarget); try { const response = await fetch("/api/auth/login", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ username: form.get("username"), password: form.get("password") }) }); const body = await response.json().catch(() => ({})); if (!response.ok) { setError(body.error || "Giriş yapılamadı."); setBusy(false); return; } router.replace("/panel"); router.refresh(); } catch { setError("Bağlantı hatası. Lütfen tekrar deneyin."); setBusy(false); } }
+  return <form onSubmit={submit} className="card w-full max-w-sm p-6"><h1 className="text-2xl font-extrabold text-ink">Panel girişi</h1><p className="mt-2 text-sm text-muted">Yetkili erişim gereklidir.</p><label className="mt-6 block text-sm font-semibold text-ink">Kullanıcı adı<input name="username" required autoComplete="username" className="mt-1.5 w-full rounded-lg border border-line px-3 py-2.5 outline-none focus:border-brand" /></label><label className="mt-4 block text-sm font-semibold text-ink">Şifre<input name="password" type="password" required autoComplete="current-password" className="mt-1.5 w-full rounded-lg border border-line px-3 py-2.5 outline-none focus:border-brand" /></label>{error && <p role="alert" className="mt-4 rounded-lg bg-rose-50 p-3 text-sm text-rose-700">{error}</p>}<button disabled={busy} className="mt-6 w-full rounded-lg bg-brand px-4 py-3 text-sm font-bold text-white disabled:opacity-60">{busy ? "Giriş yapılıyor…" : "Giriş yap"}</button></form>;
+}

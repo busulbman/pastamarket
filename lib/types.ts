@@ -6,6 +6,8 @@ export type Variant = {
   sku?: string;
 };
 
+export type ProductImageAsset = { url: string; publicId?: string; width?: number; height?: number; bytes?: number };
+
 export type Product = {
   id: number;
   slug: string;
@@ -17,6 +19,12 @@ export type Product = {
   categorySlug?: string;
   mainImage: string;
   images: string[];
+  imageUrl?: string;
+  imagePublicId?: string;
+  imageWidth?: number;
+  imageHeight?: number;
+  imageBytes?: number;
+  imageAssets?: ProductImageAsset[];
   price: number;
   salePrice: number | null;
   unit: string;

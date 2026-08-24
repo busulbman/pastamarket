@@ -10,11 +10,10 @@ import { SectionHeading } from "@/components/section-heading";
 import { CategoryCircles } from "@/components/category-circles";
 import { Advantages } from "@/components/advantages";
 
-export default function Home() {
-  const s = getSettings();
-  const nav = getCategories();
-  const bestSellers = getProductsByTag("best", 10);
-  const newArrivals = getProductsByTag("new", 10);
+export const revalidate = 300;
+
+export default async function Home() {
+  const [s, nav, bestSellers, newArrivals] = await Promise.all([getSettings(), getCategories(), getProductsByTag("best", 10), getProductsByTag("new", 10)]);
 
   return (
     <StoreShell>

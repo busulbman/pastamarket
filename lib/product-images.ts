@@ -50,10 +50,12 @@ function fileExists(publicPath: string) {
 
 /**
  * Verilen kaynağı görüntülenebilir bir yola çevirir.
- * Dönen değer her zaman yereldir ve dosyası mevcuttur.
+ * Güvenli HTTPS URL'leri (örn. ImgBB) doğrudan korur; yerel yollarda dosya
+ * varlığı denetlenir.
  */
 export function resolveImageSrc(src?: string | null): string {
   const value = (src ?? "").trim();
+  if (/^https:\/\//i.test(value)) return value;
   if (!value || !isLocalPath(value)) return PRODUCT_PLACEHOLDER;
 
   const cleaned = cleanImagePath(value);

@@ -1,0 +1,62 @@
+"use client";
+
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+import type { Category } from "@/lib/data";
+import { uploadCloudinary, validateClientImage } from "@/lib/cloudinary-client";
+import type { Product, ProductImageAsset } from "@/lib/types";
+
+type ImageProvider = "local" | "imgbb" | "cloudinary";
+type Draft = Omit<Product, "id" | "categoryName" | "categorySlug" | "variants"> & {
+  variants: { name: string; optionLabel: string; price: string }[];
+};
+
+const input = "mt-1 w-full rounded-lg border border-line p-2 outline-none focus:border-brand";
+const empty = (): Draft => ({ slug: "", name: "", description: "", brand: "", categoryId: 0, mainImage: "", images: [], imageUrl: "", imagePublicId: "", imageAssets: [], price: 0, salePrice: null, unit: "adet", weight: "", productType: "", active: true, isBestSeller: false, isNew: false, variants: [] });
+const slugify = (value: string) => value.toLocaleLowerCase("tr-TR").replaceAll("ı", "i").replaceAll("ş", "s").replaceAll("ğ", "g").replaceAll("ü", "u").replaceAll("ö", "o").replaceAll("ç", "c").replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+function initial(product?: Product): Draft { return product ? { ...product, imageUrl: product.imageUrl || product.mainImage, imageAssets: product.imageAssets || [], variants: product.variants.map((variant) => ({ ...variant, price: String(variant.price) })) } : empty(); }
+
+function asAsset(asset: ProductImageAsset) { return { url: asset.url, publicId: asset.publicId || "", width: asset.width, height: asset.height, bytes: asset.bytes }; }
+
+export function ProductForm({ product, categories, imageProvider }: { product?: Product; categories: Category[]; imageProvider: ImageProvider }) {
+  const router = useRouter();
+  const [draft, setDraft] = useState<Draft>(() => initial(product));
+  const [busy, setBusy] = useState(false); const [uploading, setUploading] = useState(false); const [error, setError] = useState("");
+  const oldPublicId = product?.imagePublicId;
+  const set = <K extends keyof Draft>(key: K, value: Draft[K]) => setDraft((old) => ({ ...old, [key]: value }));
+
+  async function upload(file?: File) {
+    if (!file || uploading) return;
+    const validation = validateClientImage(file); if (validation) return setError(validation);
+    if (!draft.slug) return setError("Görsel yüklemeden önce ürün slug'ını girin.");
+    setUploading(true); setError("");
+    try {
+      if (imageProvider === "cloudinary") {
+        const uploaded = await uploadCloudinary(file, draft.slug);
+        const asset = asAsset(uploaded);
+        setDraft((old) => ({ ...old, mainImage: uploaded.url, imageUrl: uploaded.url, imagePublicId: uploaded.publicId, imageWidth: uploaded.width, imageHeight: uploaded.height, imageBytes: uploaded.bytes, images: [uploaded.url, ...old.images.filter((url) => url !== old.mainImage)].slice(0, 12), imageAssets: [asset, ...(old.imageAssets || []).filter((item) => item.publicId !== uploaded.publicId)].slice(0, 12) }));
+      } else {
+        const body = new FormData(); body.set("file", file);
+        const response = await fetch("/api/panel/upload", { method: "POST", body }); const data = await response.json().catch(() => ({}));
+        if (!response.ok) throw new Error(data.error || "Görsel yüklenemedi.");
+        setDraft((old) => ({ ...old, mainImage: data.url, imageUrl: data.url, images: [data.url, ...old.images.filter((url) => url !== old.mainImage)].slice(0, 12) }));
+      }
+    } catch (reason) { setError(reason instanceof Error ? reason.message : "Görsel yüklenemedi."); } finally { setUploading(false); }
+  }
+
+  async function save(event: React.FormEvent) {
+    event.preventDefault(); setBusy(true); setError("");
+    const payload = { ...draft, mainImage: draft.imageUrl || draft.mainImage, imageUrl: draft.imageUrl || draft.mainImage, price: Number(draft.price), salePrice: draft.salePrice === null ? null : Number(draft.salePrice), variants: draft.variants.map((variant) => ({ ...variant, price: Number(variant.price) })) };
+    try {
+      const response = await fetch("/api/panel/products", { method: product ? "PATCH" : "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(product ? { ...payload, id: product.id } : payload) });
+      const data = await response.json().catch(() => ({})); if (!response.ok) throw new Error(data.error || "Ürün kaydedilemedi.");
+      if (imageProvider === "cloudinary" && oldPublicId && oldPublicId !== payload.imagePublicId) await fetch("/api/panel/images/delete", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ publicId: oldPublicId }) });
+      router.replace(product ? `/panel/urunler/${product.id}` : "/panel/urunler"); router.refresh();
+    } catch (reason) { setError(reason instanceof Error ? reason.message : "Ürün kaydedilemedi."); } finally { setBusy(false); }
+  }
+
+  return <form onSubmit={save} className="grid gap-6 lg:grid-cols-[1fr_340px]"><section className="card space-y-4 p-5"><h2 className="text-lg font-bold text-ink">Ürün bilgileri</h2><label className="block text-sm font-semibold">Ürün adı<input required value={draft.name} onChange={(event) => setDraft((old) => ({ ...old, name: event.target.value, slug: product ? old.slug : slugify(event.target.value) }))} className={input}/></label><label className="block text-sm font-semibold">Slug<input required value={draft.slug} onChange={(event) => set("slug", event.target.value)} className={input}/></label><div className="grid gap-4 sm:grid-cols-2"><label className="text-sm font-semibold">Kategori<select required value={draft.categoryId || ""} onChange={(event) => set("categoryId", Number(event.target.value))} className={input}><option value="">Seçin</option>{categories.map((category) => <option key={category.id} value={category.id}>{category.name}</option>)}</select></label><label className="text-sm font-semibold">Marka<input value={draft.brand} onChange={(event) => set("brand", event.target.value)} className={input}/></label><label className="text-sm font-semibold">Fiyat<input required type="number" min="0" step="0.01" value={draft.price} onChange={(event) => set("price", Number(event.target.value))} className={input}/></label><label className="text-sm font-semibold">İndirimli fiyat<input type="number" min="0" step="0.01" value={draft.salePrice ?? ""} onChange={(event) => set("salePrice", event.target.value === "" ? null : Number(event.target.value))} className={input}/></label><label className="text-sm font-semibold">Gramaj<input value={draft.weight} onChange={(event) => set("weight", event.target.value)} className={input}/></label><label className="text-sm font-semibold">Birim<input value={draft.unit} onChange={(event) => set("unit", event.target.value)} className={input}/></label></div><label className="block text-sm font-semibold">Açıklama<textarea value={draft.description} onChange={(event) => set("description", event.target.value)} className={`${input} min-h-28`}/></label><div><b className="text-sm">Varyasyonlar</b>{draft.variants.map((variant, index) => <div key={index} className="mt-2 grid gap-2 sm:grid-cols-4"><input placeholder="Başlık" value={variant.name} onChange={(event) => set("variants", draft.variants.map((item, i) => i === index ? { ...item, name: event.target.value } : item))} className="rounded-lg border border-line p-2"/><input placeholder="Seçenek" value={variant.optionLabel} onChange={(event) => set("variants", draft.variants.map((item, i) => i === index ? { ...item, optionLabel: event.target.value } : item))} className="rounded-lg border border-line p-2"/><input placeholder="Fiyat" type="number" value={variant.price} onChange={(event) => set("variants", draft.variants.map((item, i) => i === index ? { ...item, price: event.target.value } : item))} className="rounded-lg border border-line p-2"/><button type="button" onClick={() => set("variants", draft.variants.filter((_, i) => i !== index))} className="rounded-lg border border-line px-2 text-sm">Kaldır</button></div>)}<button type="button" onClick={() => set("variants", [...draft.variants, { name: "Seçenek", optionLabel: "", price: String(draft.price) }])} className="mt-3 text-sm font-bold text-brand">+ Varyasyon ekle</button></div></section><aside className="space-y-5"><section className="card p-5"><h2 className="font-bold">Görseller</h2><p className="mt-1 text-xs text-muted">JPG, PNG veya WebP · en fazla 10 MB</p><label className="mt-4 block cursor-pointer rounded-lg border border-line px-3 py-2 text-center text-sm font-semibold"><input type="file" accept="image/jpeg,image/png,image/webp" disabled={uploading} onChange={(event) => { upload(event.target.files?.[0]); event.target.value = ""; }} className="sr-only"/>{uploading ? "Yükleniyor…" : "Dosya yükle"}</label>{draft.imageUrl && <p className="mt-3 break-all text-xs text-muted">{draft.imageUrl}</p>}{draft.imagePublicId && <p className="mt-1 break-all text-xs text-muted">Cloudinary ID: {draft.imagePublicId}</p>}</section><section className="card space-y-2 p-5">{([["active", "Satışta"], ["isBestSeller", "Çok satan"], ["isNew", "Yeni ürün"]] as const).map(([key, label]) => <label key={key} className="flex gap-2 text-sm"><input type="checkbox" checked={draft[key]} onChange={(event) => set(key, event.target.checked)}/>{label}</label>)}</section>{error && <p role="alert" className="rounded-lg bg-rose-50 p-3 text-sm text-rose-700">{error}</p>}<div className="flex gap-3"><button disabled={busy || uploading} className="flex-1 rounded-lg bg-brand px-4 py-3 text-sm font-bold text-white disabled:opacity-60">{busy ? "Kaydediliyor…" : "Kaydet"}</button><Link href="/panel/urunler" className="rounded-lg border border-line px-4 py-3 text-sm font-bold">Vazgeç</Link></div></aside></form>;
+}
+
+export function ProductActions({ id, active }: { id: number; active: boolean }) { const router = useRouter(); const [busy, setBusy] = useState(false); async function change(method: "DELETE" | "PATCH") { setBusy(true); const response = await fetch(method === "DELETE" ? "/api/panel/products" : "/api/panel/products/status", { method, headers: { "Content-Type": "application/json" }, body: JSON.stringify(method === "DELETE" ? { id } : { id, active: !active }) }); setBusy(false); if (!response.ok) alert((await response.json().catch(() => ({}))).error || "İşlem yapılamadı."); router.refresh(); } return <div className="flex justify-end gap-2"><Link href={`/panel/urunler/${id}`} className="text-sm font-bold text-brand">Düzenle</Link><button type="button" disabled={busy} onClick={() => change("PATCH")} className="text-sm">{active ? "Pasif" : "Aktif"}</button><button type="button" disabled={busy} onClick={() => { if (confirm("Ürün silinsin mi?")) change("DELETE"); }} className="text-sm text-rose-600">Sil</button></div>; }

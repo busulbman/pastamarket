@@ -3,36 +3,38 @@ import { Suspense } from "react";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { ChevronRight } from "lucide-react";
-import { getCategories, getCategoryBySlug, getProductsByCategory } from "@/lib/catalog";
+import { getCategoryBySlug } from "@/lib/catalog";
+import { productPage } from "@/lib/data";
 import { hasImage } from "@/lib/product-images";
 import { ProductImage } from "@/components/product-image";
 import { StoreShell } from "@/components/store-shell";
 import { ProductList } from "@/components/product-list";
 
-/** Tüm kategori sayfaları build sırasında JSON verisinden üretilir. */
-export function generateStaticParams() {
-  return getCategories().map((category) => ({ slug: category.slug }));
-}
+export const revalidate = 300;
 
 export async function generateMetadata({
   params,
 }: {
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
-  const category = getCategoryBySlug((await params).slug);
+  const category = await getCategoryBySlug((await params).slug);
   return { title: category ? `${category.name} | PastaMarket` : "Kategori | PastaMarket" };
 }
 
 export default async function CategoryPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ slug: string }>;
+  searchParams: Promise<{ tag?: string; brand?: string }>;
 }) {
   const { slug } = await params;
-  const category = getCategoryBySlug(slug);
+  const search = await searchParams;
+  const category = await getCategoryBySlug(slug);
   if (!category) notFound();
 
-  const list = getProductsByCategory(slug);
+  const tag = search.tag === "best" || search.tag === "new" ? search.tag : undefined;
+  const list = await productPage({ category: slug, brand: search.brand || undefined, tag, limit: 24 });
 
   return (
     <StoreShell>
@@ -80,7 +82,7 @@ export default async function CategoryPage({
         <Suspense
           fallback={<p className="mt-6 text-sm text-muted">Ürünler yükleniyor…</p>}
         >
-          <ProductList products={list} showCategoryFilter={false} />
+          <ProductList products={list.products} nextCursor={list.nextCursor} categorySlug={slug} showCategoryFilter={false} />
         </Suspense>
       </main>
     </StoreShell>

@@ -1,16 +1,14 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import type { Product } from "@/lib/types";
 import { ProductCard } from "@/components/product-card";
 
 /**
- * Ürün listesi — filtreleme, arama ve sıralama TAMAMEN TARAYICIDA çalışır.
- *
- * Ürün verisi build sırasında JSON'dan gelip sayfaya gömülür; çalışma
- * zamanında sunucuya istek yapılmaz. Site statik dışa aktarılabilir kalır.
+ * İlk 24 ürün sunucudan gelir; kullanıcı isterse cursor ile bir sonraki sayfa
+ * alınır. Böylece ürün kataloğu büyüse bile ilk açılışta tamamı gönderilmez.
  */
 
 const PAGE_SIZE = 24;
@@ -28,21 +26,31 @@ export function ProductList({
   products,
   categories = [],
   showCategoryFilter = true,
+  nextCursor = null,
+  categorySlug,
 }: {
   products: Product[];
   categories?: { name: string; slug: string }[];
   showCategoryFilter?: boolean;
+  nextCursor?: string | null;
+  categorySlug?: string;
 }) {
   const searchParams = useSearchParams();
   const query = searchParams.get("q") ?? "";
   const tag = searchParams.get("tag") ?? "";
   const brand = searchParams.get("brand") ?? "";
 
+  const [loaded, setLoaded] = useState(products);
+  const [cursor, setCursor] = useState<string | null>(nextCursor);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [loadError, setLoadError] = useState("");
   const [sort, setSort] = useState("");
   const [visible, setVisible] = useState(PAGE_SIZE);
 
+  useEffect(() => { setLoaded(products); setCursor(nextCursor); }, [products, nextCursor]);
+
   const filtered = useMemo(() => {
-    let list = products;
+    let list = loaded;
 
     if (tag === "best") list = list.filter((p) => p.isBestSeller);
     if (tag === "new") list = list.filter((p) => p.isNew);
@@ -70,7 +78,18 @@ export function ProductList({
           (a, b) => Number(b.isBestSeller) - Number(a.isBestSeller),
         );
     }
-  }, [products, query, tag, brand, sort]);
+  }, [loaded, query, tag, brand, sort]);
+
+  async function loadMore() {
+    if (!cursor || loadingMore) return;
+    setLoadingMore(true); setLoadError("");
+    try {
+      const params = new URLSearchParams({ cursor }); if (categorySlug) params.set("category", categorySlug); if (tag === "best" || tag === "new") params.set("tag", tag); if (brand) params.set("brand", brand);
+      const response = await fetch(`/api/products?${params}`, { cache: "no-store" }); const data = await response.json().catch(() => ({}));
+      if (!response.ok || !Array.isArray(data.products)) throw new Error(data.error || "Ürünler yüklenemedi.");
+      setLoaded((old) => [...old, ...data.products.filter((item: Product) => !old.some((product) => product.id === item.id))]); setCursor(data.nextCursor ?? null);
+    } catch (error) { setLoadError(error instanceof Error ? error.message : "Ürünler yüklenemedi."); } finally { setLoadingMore(false); }
+  }
 
   const shown = filtered.slice(0, visible);
 
@@ -125,15 +144,17 @@ export function ProductList({
             ))}
           </div>
 
-          {visible < filtered.length && (
+          {(visible < filtered.length || cursor) && (
             <div className="mt-10 text-center">
               <button
                 type="button"
-                onClick={() => setVisible((value) => value + PAGE_SIZE)}
+                onClick={() => visible < filtered.length ? setVisible((value) => value + PAGE_SIZE) : loadMore()}
+                disabled={loadingMore}
                 className="rounded-full border border-brand px-6 py-3 text-sm font-bold text-brand transition hover:bg-brand hover:text-white"
               >
-                Daha fazla göster ({filtered.length - visible})
+                {loadingMore ? "Yükleniyor…" : visible < filtered.length ? `Daha fazla göster (${filtered.length - visible})` : "Daha fazla ürün yükle"}
               </button>
+              {loadError && <p role="alert" className="mt-3 text-sm text-rose-600">{loadError}</p>}
             </div>
           )}
         </>

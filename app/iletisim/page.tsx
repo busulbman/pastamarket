@@ -8,8 +8,9 @@ import { InstagramIcon, WhatsAppIcon } from "@/components/icons";
 
 export const metadata: Metadata = { title: "İletişim | PastaMarket" };
 
-export default function ContactPage() {
-  const s = getSettings();
+export const revalidate = 300;
+export default async function ContactPage() {
+  const s = await getSettings();
   const whatsappHref = whatsappLink(s.whatsapp, WHATSAPP_DEFAULT_MESSAGE);
 
   // Yalnızca yönetim panelinden girilmiş gerçek bilgiler gösterilir.
