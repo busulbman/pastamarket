@@ -1,5 +1,5 @@
 import "server-only";
-import type { DocumentData } from "firebase-admin/firestore";
+import type { DocumentData, Query } from "firebase-admin/firestore";
 import { firestore } from "@/lib/firebase-admin";
 import type { Product, Settings, Variant } from "@/lib/types";
 import type {
@@ -13,6 +13,8 @@ import type {
   OrderRow,
   OrderStatus,
   ProductFilters,
+  BulkImportResult,
+  BulkImportRow,
   ProductInput,
 } from "@/lib/data/types";
 
@@ -30,7 +32,7 @@ function productFrom(data: DocumentData): Product {
   return {
     id: asNumber(data.id), slug: asText(data.slug), name: asText(data.name), description: asText(data.description), brand: asText(data.brand),
     categoryId: asNumber(data.categoryId), categoryName: asText(data.categoryName), categorySlug: asText(data.categorySlug), mainImage: asText(data.mainImage),
-    images: Array.isArray(data.images) ? data.images.filter((item): item is string => typeof item === "string") : [], price: asNumber(data.price),
+    images: Array.isArray(data.images) ? data.images.filter((item): item is string => typeof item === "string") : [], imageUrl: asText(data.imageUrl) || asText(data.mainImage), imagePublicId: asText(data.imagePublicId) || undefined, imageWidth: data.imageWidth === undefined ? undefined : asNumber(data.imageWidth), imageHeight: data.imageHeight === undefined ? undefined : asNumber(data.imageHeight), imageBytes: data.imageBytes === undefined ? undefined : asNumber(data.imageBytes), imageAssets: Array.isArray(data.imageAssets) ? data.imageAssets.filter((item) => item && typeof item.url === "string") : undefined, price: asNumber(data.price),
     salePrice: data.salePrice === null || data.salePrice === undefined || data.salePrice === "" ? null : asNumber(data.salePrice), unit: asText(data.unit),
     weight: asText(data.weight), productType: asText(data.productType), active: data.active !== false, isBestSeller: data.isBestSeller === true, isNew: data.isNew === true,
     variants: variants.map((item, index): Variant => ({ id: asNumber(item?.id, index + 1), name: asText(item?.name), optionLabel: asText(item?.optionLabel), price: asNumber(item?.price), sku: asText(item?.sku) || undefined })),
@@ -56,6 +58,11 @@ async function nextId(kind: "product" | "category" | "order") {
     transaction.set(ref, { counters: { ...counters, [kind]: id } }, { merge: true });
     return id;
   });
+}
+
+async function reserveIds(kind: "product" | "category" | "order", amount: number) {
+  const db = firestore();
+  return db.runTransaction(async (transaction) => { const ref = db.collection("settings").doc(SYSTEM); const snapshot = await transaction.get(ref); const counters = (snapshot.data()?.counters ?? {}) as Record<string, unknown>; const start = asNumber(counters[kind]) + 1; transaction.set(ref, { counters: { ...counters, [kind]: start + amount - 1 } }, { merge: true }); return start; });
 }
 
 function filterProducts(items: Product[], filters: ProductFilters) {
@@ -98,7 +105,32 @@ export const firestoreProvider: DataProvider = {
   async categoryById(id) { return (await categoryFor(id))?.value; },
   async categoryBySlug(slug) { const result = await firestore().collection("categories").where("slug", "==", slug).limit(1).get(); return result.empty ? undefined : categoryFrom(result.docs[0].data()); },
   async categoryProductCount(id) { const snapshot = await firestore().collection("products").where("categoryId", "==", id).count().get(); return snapshot.data().count; },
-  async products(filters = {}) { const snapshot = await firestore().collection("products").get(); const list = filterProducts(snapshot.docs.map((doc) => productFrom(doc.data())), filters); return filters.limit ? list.slice(filters.offset ?? 0, (filters.offset ?? 0) + filters.limit) : list; },
+  async products(filters = {}) {
+    // Ana sayfa gibi küçük, filtreli vitrinler için katalog belgesinin tamamını okumayın.
+    if (filters.limit && !filters.q && !filters.brand && !filters.sort) {
+      let query: Query<DocumentData> = firestore().collection("products");
+      if (!filters.includeInactive) query = query.where("active", "==", true);
+      if (filters.category) query = query.where("categorySlug", "==", filters.category);
+      if (filters.categoryId) query = query.where("categoryId", "==", filters.categoryId);
+      if (filters.tag === "best") query = query.where("isBestSeller", "==", true);
+      if (filters.tag === "new") query = query.where("isNew", "==", true);
+      const snapshot = await query.limit(filters.limit).get();
+      return snapshot.docs.map((doc) => productFrom(doc.data()));
+    }
+    const snapshot = await firestore().collection("products").get(); const list = filterProducts(snapshot.docs.map((doc) => productFrom(doc.data())), filters); return filters.limit ? list.slice(filters.offset ?? 0, (filters.offset ?? 0) + filters.limit) : list;
+  },
+  async productPage(filters = {}) {
+    const db = firestore(); const limit = Math.min(Math.max(filters.limit ?? 24, 1), 24); let query: Query<DocumentData> = db.collection("products");
+    if (!filters.includeInactive) query = query.where("active", "==", true);
+    if (filters.category) query = query.where("categorySlug", "==", filters.category);
+    if (filters.categoryId) query = query.where("categoryId", "==", filters.categoryId);
+    if (filters.brand) query = query.where("brand", "==", filters.brand);
+    if (filters.tag === "best") query = query.where("isBestSeller", "==", true);
+    if (filters.tag === "new") query = query.where("isNew", "==", true);
+    query = query.orderBy("id").limit(limit + 1);
+    const cursor = Number(filters.cursor); if (Number.isFinite(cursor) && cursor > 0) query = query.startAfter(cursor);
+    const snapshot = await query.get(); const docs = snapshot.docs.slice(0, limit); return { products: docs.map((doc) => productFrom(doc.data())), nextCursor: snapshot.docs.length > limit ? String(asNumber(docs[docs.length - 1]?.data().id)) : null };
+  },
   async countProducts(filters = {}) { return (await this.products(filters)).length; },
   async productBySlug(slug) { const result = await firestore().collection("products").where("slug", "==", slug).limit(1).get(); if (result.empty) return null; const product = productFrom(result.docs[0].data()); return product.active ? product : null; },
   async productById(id, includeInactive = false) { const result = await firestore().collection("products").where("id", "==", id).limit(1).get(); if (result.empty) return null; const product = productFrom(result.docs[0].data()); return includeInactive || product.active ? product : null; },
@@ -136,4 +168,14 @@ export const firestoreProvider: DataProvider = {
     await db.collection("orders").doc(`order-${id}`).set({ ...input, id, order_number: number, status: "Yeni Sipariş", created_at: new Date().toISOString(), updatedAt: new Date().toISOString() });
     return { number, duplicate: false };
   },
+  async bulkImportProducts(rows: BulkImportRow[]): Promise<BulkImportResult> {
+    const categoryMap = new Map((await this.categories(false)).map((category) => [category.slug, category]));
+    const allProducts = await firestore().collection("products").get(); const existing = new Map(allProducts.docs.map((doc) => [asText(doc.data().slug), doc]));
+    const valid: { row: BulkImportRow; category: Category; existing?: typeof allProducts.docs[number] }[] = []; const failed: { rowNumber: number; error: string }[] = []; const slugs = new Set<string>();
+    for (const row of rows) { const slug = row.slug.trim(); const category = categoryMap.get(row.category_slug.trim()); const price = Number(row.price.replace(",", ".")); const compareAt = row.compare_at_price ? Number(row.compare_at_price.replace(",", ".")) : null; const activeValue = row.active.trim().toLocaleLowerCase("tr-TR"); const validActive = !activeValue || ["1", "0", "true", "false", "evet", "hayır", "yes", "no"].includes(activeValue); if (!row.name.trim() || !/^[a-z0-9-]{2,200}$/.test(slug) || !category || !Number.isFinite(price) || price < 0 || (compareAt !== null && (!Number.isFinite(compareAt) || compareAt < 0)) || !validActive || slugs.has(slug)) { failed.push({ rowNumber: row.rowNumber, error: !category ? "Kategori slug'ı bulunamadı." : slugs.has(slug) ? "CSV içinde tekrar eden slug var." : "Zorunlu alanlar, fiyat veya active değeri geçersiz." }); continue; } slugs.add(slug); valid.push({ row, category, existing: existing.get(slug) }); }
+    const newRows = valid.filter((item) => !item.existing); const firstId = newRows.length ? await reserveIds("product", newRows.length) : 0; let next = firstId; let created = 0; let updated = 0;
+    for (let index = 0; index < valid.length; index += 400) { const batch = firestore().batch(); for (const item of valid.slice(index, index + 400)) { const current = item.existing?.data(); const currentPrice = Number(item.row.price.replace(",", ".")); const compareAt = Number(item.row.compare_at_price.replace(",", ".")); const hasCompare = Number.isFinite(compareAt) && compareAt > currentPrice; const id = item.existing ? asNumber(current?.id) : next++; const activeValue = item.row.active.trim().toLocaleLowerCase("tr-TR"); const active = !activeValue ? current?.active !== false : ["1", "true", "evet", "yes"].includes(activeValue); const payload = { id, slug: item.row.slug.trim(), name: item.row.name.trim(), description: item.row.description.trim(), brand: item.row.brand.trim(), weight: item.row.weight.trim(), categoryId: item.category.id, categoryName: item.category.name, categorySlug: item.category.slug, price: hasCompare ? compareAt : currentPrice, salePrice: hasCompare ? currentPrice : null, unit: asText(current?.unit) || "adet", productType: asText(current?.productType), mainImage: asText(current?.mainImage), images: Array.isArray(current?.images) ? current?.images : [], active, isBestSeller: current?.isBestSeller === true, isNew: current?.isNew === true, variants: Array.isArray(current?.variants) ? current?.variants : [], createdAt: current?.createdAt || new Date().toISOString(), updatedAt: new Date().toISOString() }; batch.set(firestore().collection("products").doc(`product-${id}`), payload, { merge: true }); if (item.existing) updated++; else created++; } await batch.commit(); }
+    return { created, updated, skipped: 0, failed };
+  },
+  async attachProductImage(slug, asset) { const result = await firestore().collection("products").where("slug", "==", slug).limit(1).get(); if (result.empty) throw new Error("Bu slug ile ürün bulunamadı."); const current = result.docs[0].data(); const oldPublicId = asText(current.imagePublicId) || undefined; const assets = [asset, ...(Array.isArray(current.imageAssets) ? current.imageAssets.filter((item: { publicId?: string }) => item.publicId !== asset.publicId) : [])].slice(0, 12); await result.docs[0].ref.update({ mainImage: asset.url, imageUrl: asset.url, imagePublicId: asset.publicId, imageWidth: asset.width, imageHeight: asset.height, imageBytes: asset.bytes, images: [asset.url, ...(Array.isArray(current.images) ? current.images.filter((url: string) => url !== asset.url) : [])].slice(0, 12), imageAssets: assets, updatedAt: new Date().toISOString() }); return { oldPublicId }; },
 };

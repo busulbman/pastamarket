@@ -3,7 +3,8 @@ import { Suspense } from "react";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { ChevronRight } from "lucide-react";
-import { getCategoryBySlug, getProductsByCategory } from "@/lib/catalog";
+import { getCategoryBySlug } from "@/lib/catalog";
+import { productPage } from "@/lib/data";
 import { hasImage } from "@/lib/product-images";
 import { ProductImage } from "@/components/product-image";
 import { StoreShell } from "@/components/store-shell";
@@ -22,14 +23,18 @@ export async function generateMetadata({
 
 export default async function CategoryPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ slug: string }>;
+  searchParams: Promise<{ tag?: string; brand?: string }>;
 }) {
   const { slug } = await params;
+  const search = await searchParams;
   const category = await getCategoryBySlug(slug);
   if (!category) notFound();
 
-  const list = await getProductsByCategory(slug);
+  const tag = search.tag === "best" || search.tag === "new" ? search.tag : undefined;
+  const list = await productPage({ category: slug, brand: search.brand || undefined, tag, limit: 24 });
 
   return (
     <StoreShell>
@@ -77,7 +82,7 @@ export default async function CategoryPage({
         <Suspense
           fallback={<p className="mt-6 text-sm text-muted">Ürünler yükleniyor…</p>}
         >
-          <ProductList products={list} showCategoryFilter={false} />
+          <ProductList products={list.products} nextCursor={list.nextCursor} categorySlug={slug} showCategoryFilter={false} />
         </Suspense>
       </main>
     </StoreShell>

@@ -11,6 +11,7 @@ import type {
   OrderItemRow,
   OrderRow,
   ProductFilters,
+  ProductPage,
 } from "@/lib/data/types";
 
 type Catalog = { settings: Settings; categories: Category[]; products: Product[] };
@@ -54,6 +55,7 @@ export const jsonProvider: DataProvider = {
   async categoryBySlug(slug) { return load().categories.find((item) => item.slug === slug); },
   async categoryProductCount(id) { return load().products.filter((item) => item.categoryId === id).length; },
   async products(filters = {}) { const list = filterProducts(load().products, filters); return filters.limit ? list.slice(filters.offset ?? 0, (filters.offset ?? 0) + filters.limit) : list; },
+  async productPage(filters = {}): Promise<ProductPage> { const limit = Math.min(Math.max(filters.limit ?? 24, 1), 24); const offset = Number(filters.cursor ?? "0") || 0; const list = filterProducts(load().products, filters); const page = list.slice(offset, offset + limit); return { products: page, nextCursor: offset + page.length < list.length ? String(offset + page.length) : null }; },
   async countProducts(filters = {}) { return filterProducts(load().products, filters).length; },
   async productBySlug(slug) { return load().products.find((item) => item.slug === slug && item.active) ?? null; },
   async productById(id, includeInactive = false) { const product = load().products.find((item) => item.id === id) ?? null; return product && (includeInactive || product.active) ? product : null; },
@@ -68,4 +70,5 @@ export const jsonProvider: DataProvider = {
   async orderItems(_orderId: number): Promise<OrderItemRow[]> { return []; },
   async allOrderItems(): Promise<OrderItemRow[]> { return []; },
   createProduct: () => readOnly("ürün ekleme"), updateProduct: () => readOnly("ürün güncelleme"), deleteProduct: () => readOnly("ürün silme"), setProductActive: () => readOnly("ürün durumu değiştirme"), createCategory: () => readOnly("kategori ekleme"), updateCategory: () => readOnly("kategori güncelleme"), deleteCategory: () => readOnly("kategori silme"), setOrderStatus: () => readOnly("sipariş durumu değiştirme"), updateSettings: () => readOnly("ayar güncelleme"), createOrder: (_input: CreateOrderInput) => readOnly("sipariş oluşturma"),
+  bulkImportProducts: () => readOnly("toplu ürün aktarımı"), attachProductImage: () => readOnly("ürün görseli güncelleme"),
 };

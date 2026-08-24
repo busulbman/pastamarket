@@ -29,7 +29,8 @@ export function ProductImage({
   priority?: boolean;
 }) {
   const value = (src ?? "").trim();
-  const resolved = isLocalPath(value) ? value : PRODUCT_PLACEHOLDER;
+  const isRemote = /^https:\/\//i.test(value);
+  const resolved = isLocalPath(value) || isRemote ? value : PRODUCT_PLACEHOLDER;
   const isPlaceholder = resolved === PRODUCT_PLACEHOLDER;
 
   // SVG placeholder next/image ile optimize edilmez, olduğu gibi sunulur.
@@ -46,6 +47,10 @@ export function ProductImage({
         className={className}
       />
     );
+  }
+
+  if (isRemote) {
+    return <img src={resolved} alt={alt} width={width} height={height} loading={priority ? "eager" : "lazy"} decoding="async" className={className} />;
   }
 
   return (

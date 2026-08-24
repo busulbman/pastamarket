@@ -37,7 +37,7 @@ export default async function ProductPage({
 
   // Önceki sürümde benzer ürünler kategoriden bağımsız 4 kayıt çekip
   // filtrelediği için çoğu üründe boş kalıyordu.
-  const similar = (await getProductsByCategory(product.categorySlug ?? ""))
+  const similar = (await getProductsByCategory(product.categorySlug ?? "", 6))
     .filter((item) => item.id !== product.id)
     .slice(0, 5);
 

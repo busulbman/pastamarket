@@ -1,7 +1,7 @@
 import "server-only";
 
 export type DataProviderName = "json" | "firestore";
-export type ImageProviderName = "local" | "imgbb";
+export type ImageProviderName = "local" | "imgbb" | "cloudinary";
 
 const normalize = (value: string | undefined) =>
   (value ?? "").trim().replace(/\\\$/g, "$");
@@ -53,4 +53,13 @@ export function readFirebaseConfig(): FirebaseConfig | null {
 
 export function readImgBBApiKey() {
   return normalize(process.env.IMGBB_API_KEY) || null;
+}
+
+export type CloudinaryConfig = { cloudName: string; apiKey: string; apiSecret: string };
+
+export function readCloudinaryConfig(): CloudinaryConfig | null {
+  const cloudName = normalize(process.env.CLOUDINARY_CLOUD_NAME);
+  const apiKey = normalize(process.env.CLOUDINARY_API_KEY);
+  const apiSecret = normalize(process.env.CLOUDINARY_API_SECRET);
+  return cloudName && apiKey && apiSecret ? { cloudName, apiKey, apiSecret } : null;
 }

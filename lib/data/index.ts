@@ -23,6 +23,7 @@ const cachedProducts = unstable_cache(async () => (await getProvider()).products
 export const settings = cachedSettings;
 export const categories = async (activeOnly = true) => activeOnly ? cachedCategories() : (await getProvider()).categories(false);
 export const products = async (filters: ProductFilters = {}) => Object.keys(filters).length ? (await getProvider()).products(filters) : cachedProducts();
+export const productPage = async (filters: ProductFilters & { cursor?: string } = {}) => (await getProvider()).productPage(filters);
 export const countProducts = async (filters: ProductFilters = {}) => (await getProvider()).countProducts(filters);
 export const categoryById = async (id: number) => (await getProvider()).categoryById(id);
 export const categoryBySlug = async (slug: string) => (await getProvider()).categoryBySlug(slug);

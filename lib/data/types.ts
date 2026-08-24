@@ -21,6 +21,10 @@ export type ProductFilters = {
   includeInactive?: boolean;
 };
 
+export type ProductPage = { products: Product[]; nextCursor: string | null };
+export type BulkImportRow = { rowNumber: number; name: string; slug: string; category_slug: string; price: string; compare_at_price: string; brand: string; weight: string; description: string; active: string; image_filename: string };
+export type BulkImportResult = { created: number; updated: number; skipped: number; failed: { rowNumber: number; error: string }[] };
+
 export type OrderStatus = "Yeni Sipariş" | "Hazırlanıyor" | "Kargoda" | "Teslim Edildi" | "İptal Edildi";
 
 export type OrderRow = {
@@ -94,6 +98,7 @@ export interface DataProvider {
   categoryBySlug(slug: string): Promise<Category | undefined>;
   categoryProductCount(id: number): Promise<number>;
   products(filters?: ProductFilters): Promise<Product[]>;
+  productPage(filters?: ProductFilters & { cursor?: string }): Promise<ProductPage>;
   countProducts(filters?: ProductFilters): Promise<number>;
   productBySlug(slug: string): Promise<Product | null>;
   productById(id: number, includeInactive?: boolean): Promise<Product | null>;
@@ -113,4 +118,6 @@ export interface DataProvider {
   setOrderStatus(id: number, status: OrderStatus): Promise<boolean>;
   updateSettings(values: Record<string, string>): Promise<void>;
   createOrder(input: CreateOrderInput): Promise<{ number: string; duplicate: boolean }>;
+  bulkImportProducts(rows: BulkImportRow[]): Promise<BulkImportResult>;
+  attachProductImage(slug: string, asset: { url: string; publicId: string; width: number; height: number; bytes: number }): Promise<{ oldPublicId?: string }>;
 }

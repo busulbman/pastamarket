@@ -6,6 +6,7 @@ import { Product } from "@/lib/types";
 import { discountPercent, money } from "@/lib/format";
 import { ProductImage } from "@/components/product-image";
 import { useCart } from "@/components/cart";
+import { productCardImageUrl, productDetailImageUrl } from "@/lib/image-url";
 
 export function ProductDetail({
   product,
@@ -56,7 +57,7 @@ export function ProductDetail({
       <div>
         <div className="overflow-hidden rounded-2xl bg-brand-soft">
           <ProductImage
-            src={image}
+            src={productDetailImageUrl(image)}
             alt={product.name}
             width={800}
             height={800}
@@ -80,7 +81,7 @@ export function ProductDetail({
                 }`}
               >
                 <ProductImage
-                  src={src}
+                  src={productCardImageUrl(src)}
                   alt=""
                   width={64}
                   height={64}
