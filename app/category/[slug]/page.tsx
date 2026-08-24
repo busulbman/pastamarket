@@ -3,23 +3,20 @@ import { Suspense } from "react";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { ChevronRight } from "lucide-react";
-import { getCategories, getCategoryBySlug, getProductsByCategory } from "@/lib/catalog";
+import { getCategoryBySlug, getProductsByCategory } from "@/lib/catalog";
 import { hasImage } from "@/lib/product-images";
 import { ProductImage } from "@/components/product-image";
 import { StoreShell } from "@/components/store-shell";
 import { ProductList } from "@/components/product-list";
 
-/** Tüm kategori sayfaları build sırasında JSON verisinden üretilir. */
-export function generateStaticParams() {
-  return getCategories().map((category) => ({ slug: category.slug }));
-}
+export const revalidate = 300;
 
 export async function generateMetadata({
   params,
 }: {
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
-  const category = getCategoryBySlug((await params).slug);
+  const category = await getCategoryBySlug((await params).slug);
   return { title: category ? `${category.name} | PastaMarket` : "Kategori | PastaMarket" };
 }
 
@@ -29,10 +26,10 @@ export default async function CategoryPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const category = getCategoryBySlug(slug);
+  const category = await getCategoryBySlug(slug);
   if (!category) notFound();
 
-  const list = getProductsByCategory(slug);
+  const list = await getProductsByCategory(slug);
 
   return (
     <StoreShell>

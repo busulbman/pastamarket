@@ -9,9 +9,8 @@ import { WhatsAppIcon } from "@/components/icons";
  * Mağaza tarafındaki tüm sayfaların ortak çerçevesi.
  * Ayarlar ve kategoriler yalnızca burada okunur, alt bileşenlere prop olarak geçer.
  */
-export function StoreShell({ children }: { children: React.ReactNode }) {
-  const s = getSettings();
-  const nav = getCategories();
+export async function StoreShell({ children }: { children: React.ReactNode }) {
+  const [s, nav] = await Promise.all([getSettings(), getCategories()]);
   const whatsappHref = whatsappLink(s.whatsapp, WHATSAPP_DEFAULT_MESSAGE);
 
   return (

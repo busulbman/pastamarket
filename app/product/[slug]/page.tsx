@@ -4,7 +4,6 @@ import { notFound } from "next/navigation";
 import { ChevronRight } from "lucide-react";
 import {
   getProductBySlug,
-  getProducts,
   getProductsByCategory,
   getSettings,
 } from "@/lib/catalog";
@@ -13,17 +12,14 @@ import { ProductCard } from "@/components/product-card";
 import { ProductDetail } from "@/components/product-detail";
 import { SectionHeading } from "@/components/section-heading";
 
-/** Tüm ürün sayfaları build sırasında JSON verisinden üretilir. */
-export function generateStaticParams() {
-  return getProducts().map((product) => ({ slug: product.slug }));
-}
+export const revalidate = 300;
 
 export async function generateMetadata({
   params,
 }: {
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
-  const product = getProductBySlug((await params).slug);
+  const product = await getProductBySlug((await params).slug);
   if (!product) return { title: "Ürün bulunamadı | PastaMarket" };
   return {
     title: `${product.name} | PastaMarket`,
@@ -36,16 +32,16 @@ export default async function ProductPage({
 }: {
   params: Promise<{ slug: string }>;
 }) {
-  const product = getProductBySlug((await params).slug);
+  const product = await getProductBySlug((await params).slug);
   if (!product) notFound();
 
   // Önceki sürümde benzer ürünler kategoriden bağımsız 4 kayıt çekip
   // filtrelediği için çoğu üründe boş kalıyordu.
-  const similar = getProductsByCategory(product.categorySlug ?? "")
+  const similar = (await getProductsByCategory(product.categorySlug ?? ""))
     .filter((item) => item.id !== product.id)
     .slice(0, 5);
 
-  const s = getSettings();
+  const s = await getSettings();
 
   return (
     <StoreShell>

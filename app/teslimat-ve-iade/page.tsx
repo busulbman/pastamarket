@@ -5,8 +5,9 @@ import { InfoPage } from "@/components/info-page";
 
 export const metadata: Metadata = { title: "Teslimat ve İade | PastaMarket" };
 
-export default function DeliveryPage() {
-  const s = getSettings();
+export const revalidate = 300;
+export default async function DeliveryPage() {
+  const s = await getSettings();
   const districts = districtList(s.courier_districts);
 
   const rules = [

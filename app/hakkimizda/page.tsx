@@ -4,8 +4,9 @@ import { InfoPage } from "@/components/info-page";
 
 export const metadata: Metadata = { title: "Hakkımızda | PastaMarket" };
 
-export default function AboutPage() {
-  const s = getSettings();
+export const revalidate = 300;
+export default async function AboutPage() {
+  const s = await getSettings();
 
   return (
     <InfoPage

@@ -6,8 +6,9 @@ export const metadata: Metadata = {
   title: "Mesafeli Satış Sözleşmesi | PastaMarket",
 };
 
-export default function DistanceSalesPage() {
-  const s = getSettings();
+export const revalidate = 300;
+export default async function DistanceSalesPage() {
+  const s = await getSettings();
 
   return (
     <InfoPage

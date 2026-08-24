@@ -11,9 +11,10 @@ export const metadata: Metadata = { title: "Tüm Ürünler | PastaMarket" };
  * Tüm ürünler sayfası statik üretilir; katalog build sırasında gömülür.
  * Arama, marka ve etiket filtreleri tarayıcıda çalışır (bkz. ProductList).
  */
-export default function ProductsPage() {
-  const products = getProducts();
-  const categories = getCategories();
+export const revalidate = 300;
+
+export default async function ProductsPage() {
+  const [products, categories] = await Promise.all([getProducts(), getCategories()]);
 
   return (
     <StoreShell>

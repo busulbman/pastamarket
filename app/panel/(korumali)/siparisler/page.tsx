@@ -1,0 +1,4 @@
+import { orders } from "@/lib/data";
+import { OrderStatus } from "@/components/panel/order-status";
+export const dynamic = "force-dynamic";
+export default async function PanelOrders() { const list = await orders(); return <><h1 className="mb-6 text-2xl font-extrabold text-ink">Siparişler</h1>{list.length ? <div className="space-y-4">{list.map((order) => <article key={order.id} className="card p-5"><div className="flex flex-wrap items-start justify-between gap-3"><div><b>{order.order_number}</b><p className="mt-1 text-sm text-muted">{order.first_name} {order.last_name} · {order.phone}</p><p className="text-xs text-muted">{order.address}, {order.district}/{order.city}</p></div><div className="text-right"><b>₺{order.total.toFixed(2)}</b><OrderStatus id={order.id} status={order.status}/></div></div></article>)}</div> : <p className="text-sm text-muted">Henüz sipariş yok.</p>}</>; }

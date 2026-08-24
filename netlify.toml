@@ -1,15 +1,11 @@
-# Netlify — PastaMarket statik müşteri demosu
-#
-# Site tamamen statiktir: Function, SSR, API route ve native modül yoktur.
-# Bu yüzden Next.js runtime eklentisi (@netlify/plugin-nextjs) KULLANILMAZ;
-# [[plugins]], [functions] ve included_files tanımı bilerek yoktur.
+# Netlify, Next.js App Router, SSR/ISR ve Route Handler'ları OpenNext ile
+# otomatik algılar. Statik export publish klasörü bilinçli olarak yoktur.
 
 [build]
   command = "npm run build"
-  publish = "out"
 
 [build.environment]
-  NODE_VERSION = "20"
+  NODE_VERSION = "22"
 
 [[headers]]
   for = "/images/*"

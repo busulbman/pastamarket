@@ -25,8 +25,8 @@ const PAYMENT_LABELS: Record<string, string> = {
 const inputClass =
   "mt-1.5 h-11 w-full rounded-xl border border-line px-3 text-sm outline-none focus:border-brand";
 
-export function WhatsAppOrderForm({ settings: s }: { settings: Record<string, string> }) {
-  const { items, subtotal } = useCart();
+export function WhatsAppOrderForm({ settings: s, createOrders = false }: { settings: Record<string, string>; createOrders?: boolean }) {
+  const { items, subtotal, clear } = useCart();
 
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
@@ -37,6 +37,8 @@ export function WhatsAppOrderForm({ settings: s }: { settings: Record<string, st
   const [delivery, setDelivery] = useState<Delivery>("shipping");
   const [payment, setPayment] = useState("cash");
   const [copyState, setCopyState] = useState<"idle" | "copied" | "failed">("idle");
+  const [ordering, setOrdering] = useState(false);
+  const [orderMessage, setOrderMessage] = useState("");
 
   /**
    * IBAN panoya BOŞLUKSUZ kopyalanır; işlem tamamen istemci tarafındadır.
@@ -126,6 +128,19 @@ export function WhatsAppOrderForm({ settings: s }: { settings: Record<string, st
 
   const href = whatsappLink(s.whatsapp, message);
   const ready = items.length > 0 && name.trim() && phone.trim() && address.trim();
+
+  async function submitOrder() {
+    if (!ready || ordering) return;
+    const parts = name.trim().split(/\s+/);
+    if (parts.length < 2) return setOrderMessage("Lütfen ad ve soyadınızı yazın.");
+    setOrdering(true); setOrderMessage("");
+    try {
+      const response = await fetch("/api/checkout", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ firstName: parts[0], lastName: parts.slice(1).join(" "), phone, city, district, address, customerNote: note, deliveryMethod: effectiveDelivery, paymentMethod: payment, idempotencyKey: crypto.randomUUID(), items: items.map((item) => ({ productId: item.productId, variantId: item.variantId, quantity: item.quantity })) }) });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) return setOrderMessage(data.error || "Sipariş oluşturulamadı.");
+      clear(); setOrderMessage(`Siparişiniz alındı. Sipariş numaranız: ${data.number}`);
+    } catch { setOrderMessage("Bağlantı hatası. Lütfen tekrar deneyin."); } finally { setOrdering(false); }
+  }
 
   if (!items.length) {
     return (
@@ -381,7 +396,11 @@ export function WhatsAppOrderForm({ settings: s }: { settings: Record<string, st
           </p>
         </div>
 
-        {href ? (
+        {createOrders ? (
+          <button type="button" disabled={!ready || ordering} onClick={submitOrder} className="mt-5 flex w-full items-center justify-center rounded-full bg-brand py-3.5 text-sm font-bold text-white disabled:opacity-50">
+            {ordering ? "Sipariş gönderiliyor…" : "Siparişi Tamamla"}
+          </button>
+        ) : href ? (
           <a
             href={ready ? href : undefined}
             target="_blank"
@@ -400,15 +419,14 @@ export function WhatsAppOrderForm({ settings: s }: { settings: Record<string, st
           </p>
         )}
 
-        {!ready && href && (
+        {!ready && (href || createOrders) && (
           <p className="mt-3 text-center text-[11px] leading-4 text-muted">
             Ad, telefon ve adres alanlarını doldurun.
           </p>
         )}
 
-        <p className="mt-3 text-center text-[11px] leading-4 text-muted">
-          Siparişiniz WhatsApp üzerinden iletilir; bu sayfada kayıt tutulmaz.
-        </p>
+        {orderMessage && <p role="status" className="mt-3 rounded-xl bg-brand-soft p-3 text-center text-xs text-ink">{orderMessage}</p>}
+        <p className="mt-3 text-center text-[11px] leading-4 text-muted">{createOrders ? "Siparişiniz güvenle kaydedilir ve panelden takip edilir." : "Siparişiniz WhatsApp üzerinden iletilir; bu sayfada kayıt tutulmaz."}</p>
       </aside>
     </div>
   );

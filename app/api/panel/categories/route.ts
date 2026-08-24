@@ -1,0 +1,9 @@
+import { revalidateTag } from "next/cache";
+import { NextResponse } from "next/server";
+import { writes } from "@/lib/data";
+import { badRequest, guard, readJson } from "@/lib/panel-api";
+import { categorySchema, categoryUpdateSchema, firstIssue, idSchema } from "@/lib/panel-schemas";
+export const runtime = "nodejs";
+export async function POST(request: Request) { const denied = await guard(); if (denied) return denied; const input = categorySchema.safeParse(await readJson(request)); if (!input.success) return badRequest(firstIssue(input.error)); try { const id = await (await writes()).createCategory(input.data); revalidateTag("catalog"); return NextResponse.json({ id }); } catch (error) { return badRequest(error instanceof Error ? error.message : "Kategori kaydedilemedi."); } }
+export async function PATCH(request: Request) { const denied = await guard(); if (denied) return denied; const input = categoryUpdateSchema.safeParse(await readJson(request)); if (!input.success) return badRequest(firstIssue(input.error)); try { const ok = await (await writes()).updateCategory(input.data.id, input.data); if (!ok) return badRequest("Kategori bulunamadı.", 404); revalidateTag("catalog"); return NextResponse.json({ ok: true }); } catch (error) { return badRequest(error instanceof Error ? error.message : "Kategori güncellenemedi."); } }
+export async function DELETE(request: Request) { const denied = await guard(); if (denied) return denied; const input = idSchema.safeParse(await readJson(request)); if (!input.success) return badRequest("Geçersiz kategori."); if (await (await writes()).categoryProductCount(input.data.id)) return badRequest("Bu kategoride ürünler var. Önce ürünleri taşıyın.", 409); const ok = await (await writes()).deleteCategory(input.data.id); if (!ok) return badRequest("Kategori bulunamadı.", 404); revalidateTag("catalog"); return NextResponse.json({ ok: true }); }
