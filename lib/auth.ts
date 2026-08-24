@@ -12,6 +12,12 @@ function sign(value: string, secret: string) {
   return crypto.createHmac("sha256", secret).update(value).digest("base64url");
 }
 
+function safeTextEqual(left: string, right: string) {
+  const leftBuffer = Buffer.from(left);
+  const rightBuffer = Buffer.from(right);
+  return leftBuffer.length === rightBuffer.length && crypto.timingSafeEqual(leftBuffer, rightBuffer);
+}
+
 export const sessionCookieOptions = {
   httpOnly: true,
   secure: isProduction,
@@ -50,6 +56,10 @@ export async function requireAdmin() { return Boolean(await currentAdmin()); }
 export async function signIn(username: unknown, password: unknown) {
   const config = readAdminAuthConfig();
   if (!config.configured) return null;
-  const matchesHash = await bcrypt.compare(String(password ?? ""), config.passwordHash);
-  return String(username ?? "").trim() === config.username && matchesHash ? { username: config.username } : null;
+  const submittedPassword = String(password ?? "");
+  const passwordMatches = config.password.length > 0
+    ? safeTextEqual(submittedPassword, config.password)
+    : await bcrypt.compare(submittedPassword, config.passwordHash);
+  const usernameMatches = safeTextEqual(String(username ?? "").trim(), config.username);
+  return usernameMatches && passwordMatches ? { username: config.username } : null;
 }

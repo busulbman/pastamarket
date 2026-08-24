@@ -16,7 +16,8 @@ repoya eklemeyin.
 | `DATA_PROVIDER` | Yerel/demo için `json`, canlı ortam için `firestore` |
 | `IMAGE_PROVIDER` | `imgbb` veya production için `cloudinary` |
 | `ADMIN_USERNAME` | Panel kullanıcı adı |
-| `ADMIN_PASSWORD_HASH` | bcrypt parola hash’i |
+| `ADMIN_PASSWORD` | Varsa öncelikli kullanılan düz panel parolası; yalnızca Netlify environment ayarında saklayın |
+| `ADMIN_PASSWORD_HASH` | `ADMIN_PASSWORD` boşsa kullanılan bcrypt parola hash’i |
 | `ADMIN_SESSION_SECRET` | En az 32 karakterlik oturum imzalama anahtarı |
 | `FIREBASE_PROJECT_ID`, `FIREBASE_CLIENT_EMAIL`, `FIREBASE_PRIVATE_KEY` | Sunucu tarafı Firebase Admin yapılandırması |
 | `IMGBB_API_KEY` | Yalnızca korumalı upload route’unun kullandığı anahtar |

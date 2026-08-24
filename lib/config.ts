@@ -18,6 +18,7 @@ const BCRYPT_PATTERN = /^\$2[aby]\$\d{2}\$[./A-Za-z0-9]{53}$/;
 
 export type AdminAuthConfig = {
   username: string;
+  password: string;
   passwordHash: string;
   sessionSecret: string;
   configured: boolean;
@@ -25,15 +26,18 @@ export type AdminAuthConfig = {
 
 export function readAdminAuthConfig(): AdminAuthConfig {
   const username = normalize(process.env.ADMIN_USERNAME);
+  // Düz parola boşluk içerebileceği için trim/normalize edilmez.
+  const password = process.env.ADMIN_PASSWORD ?? "";
   const passwordHash = normalize(process.env.ADMIN_PASSWORD_HASH);
   const sessionSecret = normalize(process.env.ADMIN_SESSION_SECRET);
   return {
     username,
+    password,
     passwordHash,
     sessionSecret,
     configured:
       username.length > 0 &&
-      BCRYPT_PATTERN.test(passwordHash) &&
+      (password.length > 0 || BCRYPT_PATTERN.test(passwordHash)) &&
       sessionSecret.length >= MIN_SESSION_SECRET_LENGTH,
   };
 }
