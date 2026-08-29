@@ -22,6 +22,11 @@ export function productPublicId(slug: string) {
   return `${CLOUDINARY_FOLDER}/${clean}`;
 }
 
+function newProductAssetId(slug: string, timestamp: number) {
+  const productId = productPublicId(slug).slice(`${CLOUDINARY_FOLDER}/`.length);
+  return `${productId}-${timestamp}-${crypto.randomUUID().replaceAll("-", "").slice(0, 12)}`;
+}
+
 function signature(parameters: Record<string, string | number>, secret: string) {
   const text = Object.entries(parameters).sort(([a], [b]) => a.localeCompare(b)).map(([key, value]) => `${key}=${value}`).join("&");
   return crypto.createHash("sha1").update(`${text}${secret}`).digest("hex");
@@ -32,8 +37,7 @@ export function createUploadSignature(slug: string) {
   const credentials = readCloudinaryConfig();
   if (!credentials) throw new Error("Cloudinary yapılandırması eksik.");
   const timestamp = Math.floor(Date.now() / 1000);
-  const publicId = productPublicId(slug);
-  const params = { folder: CLOUDINARY_FOLDER, public_id: publicId.slice(`${CLOUDINARY_FOLDER}/`.length), overwrite: "true", unique_filename: "false", timestamp };
+  const params = { folder: CLOUDINARY_FOLDER, public_id: newProductAssetId(slug, timestamp), overwrite: "false", unique_filename: "false", timestamp };
   return { cloudName: credentials.cloudName, apiKey: credentials.apiKey, timestamp, signature: signature(params, credentials.apiSecret), folder: params.folder, publicId: params.public_id, expiresAt: (timestamp + 600) * 1000 };
 }
 

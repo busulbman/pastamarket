@@ -13,7 +13,7 @@ export async function uploadCloudinary(file: File, slug: string): Promise<Upload
   const signature = await signed.json().catch(() => ({}));
   if (!signed.ok) throw new Error(signature.error || "Cloudinary imzası oluşturulamadı.");
   if (Date.now() >= signature.expiresAt) throw new Error("Yükleme imzasının süresi doldu. Lütfen tekrar deneyin.");
-  const body = new FormData(); body.set("file", file); body.set("api_key", signature.apiKey); body.set("timestamp", String(signature.timestamp)); body.set("signature", signature.signature); body.set("folder", signature.folder); body.set("public_id", signature.publicId); body.set("overwrite", "true"); body.set("unique_filename", "false");
+  const body = new FormData(); body.set("file", file); body.set("api_key", signature.apiKey); body.set("timestamp", String(signature.timestamp)); body.set("signature", signature.signature); body.set("folder", signature.folder); body.set("public_id", signature.publicId); body.set("overwrite", "false"); body.set("unique_filename", "false");
   const response = await fetch(`https://api.cloudinary.com/v1_1/${encodeURIComponent(signature.cloudName)}/image/upload`, { method: "POST", body });
   const data = await response.json().catch(() => ({}));
   if (!response.ok || !data.secure_url || !data.public_id) throw new Error(data.error?.message || "Cloudinary görsel yüklemesi başarısız oldu.");
