@@ -5,6 +5,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import type { Product } from "@/lib/types";
 import { ProductCard } from "@/components/product-card";
+import { matchesSearch } from "@/lib/search";
 
 /**
  * İlk 24 ürün sunucudan gelir; kullanıcı isterse cursor ile bir sonraki sayfa
@@ -19,8 +20,6 @@ const SORT_OPTIONS = [
   { value: "price_desc", label: "Fiyat: azalan" },
   { value: "name", label: "İsme göre (A–Z)" },
 ];
-
-const lower = (value: string) => value.toLocaleLowerCase("tr-TR");
 
 export function ProductList({
   products,
@@ -56,14 +55,8 @@ export function ProductList({
     if (tag === "new") list = list.filter((p) => p.isNew);
     if (brand) list = list.filter((p) => p.brand === brand);
 
-    if (query.trim()) {
-      const needle = lower(query.trim());
-      list = list.filter((product) =>
-        lower(
-          `${product.name} ${product.description} ${product.brand} ${product.categoryName ?? ""} ${product.weight}`,
-        ).includes(needle),
-      );
-    }
+    // Arama sonuçları sunucudan süzülmüş gelir; aynı kural burada da uygulanır.
+    if (query.trim()) list = list.filter((product) => matchesSearch(product, query));
 
     const sorted = [...list];
     switch (sort) {
@@ -74,6 +67,8 @@ export function ProductList({
       case "name":
         return sorted.sort((a, b) => a.name.localeCompare(b.name, "tr-TR"));
       default:
+        // Aramada sunucunun alaka sıralaması (ad eşleşmesi önce) korunur.
+        if (query.trim()) return sorted;
         return sorted.sort(
           (a, b) => Number(b.isBestSeller) - Number(a.isBestSeller),
         );
@@ -84,7 +79,7 @@ export function ProductList({
     if (!cursor || loadingMore) return;
     setLoadingMore(true); setLoadError("");
     try {
-      const params = new URLSearchParams({ cursor }); if (categorySlug) params.set("category", categorySlug); if (tag === "best" || tag === "new") params.set("tag", tag); if (brand) params.set("brand", brand);
+      const params = new URLSearchParams({ cursor }); if (categorySlug) params.set("category", categorySlug); if (tag === "best" || tag === "new") params.set("tag", tag); if (brand) params.set("brand", brand); if (query.trim()) params.set("q", query.trim());
       const response = await fetch(`/api/products?${params}`, { cache: "no-store" }); const data = await response.json().catch(() => ({}));
       if (!response.ok || !Array.isArray(data.products)) throw new Error(data.error || "Ürünler yüklenemedi.");
       setLoaded((old) => [...old, ...data.products.filter((item: Product) => !old.some((product) => product.id === item.id))]); setCursor(data.nextCursor ?? null);

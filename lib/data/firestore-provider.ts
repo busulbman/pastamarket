@@ -1,6 +1,7 @@
 import "server-only";
 import type { DocumentData, Query } from "firebase-admin/firestore";
 import { firestore } from "@/lib/firebase-admin";
+import { matchesSearch, searchScore } from "@/lib/search";
 import type { Product, Settings, Variant } from "@/lib/types";
 import type {
   Category,
@@ -66,7 +67,7 @@ async function reserveIds(kind: "product" | "category" | "order", amount: number
 }
 
 function filterProducts(items: Product[], filters: ProductFilters) {
-  const query = filters.q?.toLocaleLowerCase("tr-TR").trim();
+  const query = filters.q?.trim() ?? "";
   const list = items.filter((product) => {
     if (!filters.includeInactive && !product.active) return false;
     if (filters.category && product.categorySlug !== filters.category) return false;
@@ -74,12 +75,13 @@ function filterProducts(items: Product[], filters: ProductFilters) {
     if (filters.brand && product.brand !== filters.brand) return false;
     if (filters.tag === "best" && !product.isBestSeller) return false;
     if (filters.tag === "new" && !product.isNew) return false;
-    return !query || `${product.name} ${product.description} ${product.brand}`.toLocaleLowerCase("tr-TR").includes(query);
+    return matchesSearch(product, query);
   });
   return [...list].sort((a, b) => {
     if (filters.sort === "price_asc") return a.price - b.price;
     if (filters.sort === "price_desc") return b.price - a.price;
     if (filters.sort === "name") return a.name.localeCompare(b.name, "tr-TR");
+    if (query) return searchScore(b, query) - searchScore(a, query) || Number(b.isBestSeller) - Number(a.isBestSeller);
     return Number(b.isBestSeller) - Number(a.isBestSeller);
   });
 }
@@ -120,6 +122,13 @@ export const firestoreProvider: DataProvider = {
     const snapshot = await firestore().collection("products").get(); const list = filterProducts(snapshot.docs.map((doc) => productFrom(doc.data())), filters); return filters.limit ? list.slice(filters.offset ?? 0, (filters.offset ?? 0) + filters.limit) : list;
   },
   async productPage(filters = {}) {
+    // Metin araması Firestore sorgusuyla yapılamaz: güncel koleksiyonun tamamı okunur,
+    // eşleşenler bellekte süzülür ve cursor sıra (offset) olarak kullanılır.
+    if (filters.q?.trim()) {
+      const limit = Math.min(Math.max(filters.limit ?? 24, 1), 24); const offset = Math.max(Number(filters.cursor) || 0, 0);
+      const list = filterProducts((await firestore().collection("products").get()).docs.map((doc) => productFrom(doc.data())), filters); const page = list.slice(offset, offset + limit);
+      return { products: page, nextCursor: offset + page.length < list.length ? String(offset + page.length) : null };
+    }
     const db = firestore(); const limit = Math.min(Math.max(filters.limit ?? 24, 1), 24); let query: Query<DocumentData> = db.collection("products");
     if (!filters.includeInactive) query = query.where("active", "==", true);
     if (filters.category) query = query.where("categorySlug", "==", filters.category);
@@ -143,7 +152,7 @@ export const firestoreProvider: DataProvider = {
   async recentOrders(limit = 8) { return (await this.orders()).slice(0, limit); },
   async orders(filters: OrderFilters = {}) {
     const snapshot = await firestore().collection("orders").get();
-    const query = filters.q?.toLocaleLowerCase("tr-TR").trim();
+    const query = filters.q?.trim() ?? "";
     return snapshot.docs.map((doc) => orderFrom(doc.data())).filter((order) => (!filters.status || order.status === filters.status) && (!filters.from || order.created_at.slice(0, 10) >= filters.from) && (!filters.to || order.created_at.slice(0, 10) <= filters.to) && (!query || `${order.order_number} ${order.first_name} ${order.last_name} ${order.phone}`.toLocaleLowerCase("tr-TR").includes(query))).sort((a, b) => b.created_at.localeCompare(a.created_at));
   },
   async orderItems(orderId) { const doc = await firestore().collection("orders").doc(`order-${orderId}`).get(); if (!doc.exists) return []; const items = doc.data()?.items; return Array.isArray(items) ? items.map((item, index) => ({ ...item, id: orderId * 1000 + index + 1, order_id: orderId } as OrderItemRow)) : []; },

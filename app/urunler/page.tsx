@@ -16,12 +16,14 @@ export const revalidate = 300;
 export default async function ProductsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ tag?: string; brand?: string }>;
+  searchParams: Promise<{ tag?: string; brand?: string; q?: string }>;
 }) {
   const search = await searchParams;
   const tag = search.tag === "best" || search.tag === "new" ? search.tag : undefined;
   const brand = search.brand || undefined;
-  const [page, categories] = await Promise.all([productPage({ limit: 24, tag, brand }), getCategories()]);
+  // Arama sunucuda, ürün listesiyle aynı veri kaynağında (provider) yapılır.
+  const q = search.q?.trim() || undefined;
+  const [page, categories] = await Promise.all([productPage({ limit: 24, tag, brand, q }), getCategories()]);
 
   return (
     <StoreShell>

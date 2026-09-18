@@ -1,6 +1,7 @@
 import "server-only";
 import fs from "node:fs";
 import path from "node:path";
+import { matchesSearch, searchScore } from "@/lib/search";
 import type { Product, Settings } from "@/lib/types";
 import type {
   Category,
@@ -26,7 +27,7 @@ function load() {
 }
 
 function filterProducts(items: Product[], filters: ProductFilters = {}) {
-  const query = filters.q?.toLocaleLowerCase("tr-TR").trim();
+  const query = filters.q?.trim() ?? "";
   const list = items.filter((product) => {
     if (!filters.includeInactive && !product.active) return false;
     if (filters.category && product.categorySlug !== filters.category) return false;
@@ -34,12 +35,13 @@ function filterProducts(items: Product[], filters: ProductFilters = {}) {
     if (filters.brand && product.brand !== filters.brand) return false;
     if (filters.tag === "best" && !product.isBestSeller) return false;
     if (filters.tag === "new" && !product.isNew) return false;
-    return !query || `${product.name} ${product.description} ${product.brand}`.toLocaleLowerCase("tr-TR").includes(query);
+    return matchesSearch(product, query);
   });
   return [...list].sort((a, b) => {
     if (filters.sort === "price_asc") return a.price - b.price;
     if (filters.sort === "price_desc") return b.price - a.price;
     if (filters.sort === "name") return a.name.localeCompare(b.name, "tr-TR");
+    if (query) return searchScore(b, query) - searchScore(a, query) || Number(b.isBestSeller) - Number(a.isBestSeller);
     return Number(b.isBestSeller) - Number(a.isBestSeller);
   });
 }
